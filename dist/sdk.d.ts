@@ -3,6 +3,7 @@
  */
 import { neboFetch } from './fetch';
 import { NeboWebSocket } from './websocket';
+import { decide } from './decide';
 export declare class NeboSDK {
     fetch: typeof neboFetch;
     WebSocket: typeof NeboWebSocket;
@@ -22,6 +23,7 @@ export declare class NeboSDK {
         complete(options: import("./types").JanusOptions): Promise<string>;
         stream(options: import("./types").JanusOptions): AsyncGenerator<string>;
     };
+    decide: typeof decide;
     surfaces: import("./surfaces").NeboSurfaces;
     a2ui: import("./a2ui").NeboA2UI;
     identity: {

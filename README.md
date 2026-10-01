@@ -51,12 +51,8 @@ nebo.chat.mount(document.getElementById('chat'), {
   theme: 'dark',
 });
 
-// Listen for agent-pushed state
-nebo.surfaces.connect();
-nebo.surfaces.on('state_snapshot', (e) => {
-  appState = e.snapshot;
-  render();
-});
+// Redraw when the app's employee (or another open window) changes the data
+nebo.storage.onChange(() => render());
 ```
 
 ## API Reference
@@ -68,7 +64,37 @@ Auto-routed fetch. Relative URLs go to your sidecar. Absolute URLs go through Ne
 Auto-reconnecting WebSocket to the app's own channel, with exponential backoff (1 s up to 30 s). It takes no path: any argument is ignored. To reach your own server (a game server, for example), open a plain `new WebSocket('wss://...')` from the page.
 
 ### `nebo.storage`
-Server-persisted async key-value store: `getItem`, `setItem`, `removeItem`, `clear`, `keys`.
+Server-persisted async key-value store for your app. It is the same store your app's employee reads and changes, so a record the owner adds by talking to the employee shows on the page, and one typed into the page is one the employee can find.
+
+| Call | Behavior |
+|------|----------|
+| `getItem(key)` | The value `setItem` stored (object, list, number, string), or `null` if the key is absent. |
+| `setItem(key, value)` | Stores any JSON value. |
+| `removeItem(key)` | Removes the key. It no longer appears in `keys()`. |
+| `keys()` | Every key, in sorted order. |
+| `clear()` | Removes every key. Each removal is reported to `onChange`. |
+| `onChange(handler)` | Calls `handler({ appId, keys, action, source })` after every write to the store. Returns a function that stops listening. |
+
+`action` is `"set"` or `"delete"`. `source` is `"employee"` when the app's employee made the change and `"page"` when a page did. Your own page's writes are reported too, so the simplest handler just reloads what it shows:
+
+```typescript
+async function render() {
+  const contacts = (await nebo.storage.getItem('contacts')) ?? [];
+  list.replaceChildren(...contacts.map((c) => row(c)));
+}
+
+render();
+const stop = nebo.storage.onChange((change) => {
+  if (change.keys.includes('contacts')) render();
+});
+// later: stop();
+```
+
+Tips:
+- Pick keys both the page and the employee can find: one key holding a list (`contacts`), or one key per record under a prefix (`contact:42`). The employee can search inside a list item by item.
+- A string that is itself valid JSON, such as `"42"` or `"true"`, comes back parsed (`42`, `true`). If the exact type matters, store it inside an object: `{ "code": "42" }`.
+- Keep each value well under 2 MB. For large or relational data, use a sidecar.
+- `setItem` and `removeItem` do not throw when the server refuses a write. If a save matters, read it back.
 
 ### `nebo.agents`
 - `invoke(message, options?)`: one-shot agent call, returns `{ text, tools? }`
@@ -87,7 +113,11 @@ Server-persisted async key-value store: `getItem`, `setItem`, `removeItem`, `cle
 - `newThread()`: Start a new conversation
 
 ### `nebo.surfaces`
-Real-time agent-to-app event system with typed events:
+The app's live channel. Call `connect()` before using `nebo.a2ui`: it is the socket that carries interactive cards from the employee to the page.
+
+> Today Nebo sends app pages interactive cards (see `nebo.a2ui`) and storage changes (see `storage.onChange`). The typed events listed below are defined in the SDK, but Nebo does not send them to app pages yet, and nothing answers `send()` or `requestState()`. Build live updates on `storage.onChange` and cards on `nebo.a2ui`.
+
+The API:
 - `connect()` / `disconnect()`
 - `on(type, handler)`: Subscribe to events (returns unsubscribe fn)
 - `send(name, payload?)`: Send action to agent
@@ -100,10 +130,12 @@ Events: `run_started`, `run_finished`, `run_error`, `text_start`, `text_content`
 - `invalidate()`: Clear cached identity
 
 ### `nebo.a2ui`
-A2UI v0.9 message bridge for agent-driven UI components.
-- `init(processor)`: Initialize with `@a2ui/web_core` MessageProcessor
+A2UI v0.9 message bridge for agent-driven UI components. The app's employee can show a card on your page (a contact, a form, a set of buttons); a click goes back to that same employee.
+- `init(processor)`: Initialize with an `@a2ui/web_core` MessageProcessor. The SDK does not include a renderer; bundle one with your page.
 - `sendAction(surfaceId, action)`: Send UI action to agent
 - `sendError(surfaceId, code, message)`: Report error to agent
+
+Call `nebo.surfaces.connect()` so cards arrive. Cards reach only the app they were made for. A page opened after a card was sent does not receive it, so keep anything the page must always show in `nebo.storage`.
 
 ### `nebo.configure(options)`
 Set `appId` and `baseUrl` manually (auto-detected by default).

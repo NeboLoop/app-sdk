@@ -134,9 +134,18 @@ const { answers } = await nebo.decide({
 - Keep `state` to the fields the questions need and name them in backticks
   inside `instructions`. Very long state is shortened in the middle before it
   is sent.
-- Throws an `Error` whose message is the reason: a malformed question (a
-  choice with one option, a `noul` with `criteria`, empty `instructions`),
-  the bot not signed in to NeboAI, or the decision service failing.
+- Throws an `Error` whose message is the reason. The error carries only the
+  message, not a status code. The reasons, with the status the bot's route
+  answers:
+  - 400: a malformed question (a choice with one option, a `noul` with
+    `criteria`, empty `instructions`), with what is wrong.
+  - 429: "You've used all the work included in your account. Choose a plan
+    or add credits to continue." Retrying does not help until the owner adds
+    a plan or credits.
+  - 429: "Too many decisions at once. Try again in a moment." The bot has
+    already retried once.
+  - 503: "Decisions need NeboAI connected. Sign in to NeboAI and try again."
+  - 502: the decision service failed; try again later.
 - Keep counting, dates and thresholds in your own code; ask only what needs
   judgment.
 - Billed like any model call; see pricing at https://neboai.com/pricing.

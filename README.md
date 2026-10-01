@@ -112,7 +112,7 @@ app's employee asks the same way with its `decide` tool.
 
 ```js
 const { answers } = await nebo.decide({
-  state: { company: 'Acme', status: 'asked for a quote today' },
+  state: { company: 'Example Co', status: 'asked for a quote today' },
   questions: {
     tier:  { type: 'choice', instructions: 'How warm is this lead, by `status`?',
              criteria: { hot: 'ready to buy', warm: 'interested', cold: 'not now', other: "can't tell" } },
@@ -129,8 +129,18 @@ const { answers } = await nebo.decide({
 - `score`: 2–10 ordered levels, lowest first.
 - `noul`: one statement; no criteria.
 - The whole question lives in `instructions`; the key only names the answer.
-- Resolves to `{ model, answers, usage }`; throws with the reason when the
-  request is malformed or NeboAI is not connected.
+- Resolves to `{ model, answers, usage }`; each answer comes back under its
+  question's name. `noul` answers carry no separate `confidence`.
+- Keep `state` to the fields the questions need and name them in backticks
+  inside `instructions`. Very long state is shortened in the middle before it
+  is sent.
+- Throws an `Error` whose message is the reason: a malformed question (a
+  choice with one option, a `noul` with `criteria`, empty `instructions`),
+  the bot not signed in to NeboAI, or the decision service failing.
+- Keep counting, dates and thresholds in your own code; ask only what needs
+  judgment.
+- Billed like any model call; see pricing at https://neboai.com/pricing.
+- Types: `DecideQuestion`, `DecideRequest`, `DecideAnswer`, `Decision`.
 
 ### `nebo.chat`
 - `mount(element, options?)`: Embed chat UI

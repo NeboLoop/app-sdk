@@ -12,6 +12,7 @@ export declare class NeboSDK {
         removeItem(key: string): Promise<void>;
         clear(): Promise<void>;
         keys(): Promise<string[]>;
+        onChange(handler: (change: import("./storage").StorageChange) => void): () => void;
     };
     agents: {
         invoke(message: string, options?: import("./types").InvokeOptions): Promise<import("./types").AgentResponse>;

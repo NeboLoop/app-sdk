@@ -22,6 +22,7 @@ export { NeboWebSocket } from './websocket';
 export { NeboSurfaces, surfaces } from './surfaces';
 export { NeboA2UI, a2ui } from './a2ui';
 export { storage } from './storage';
+export type { StorageChange } from './storage';
 export { agents } from './agents';
 export { janus } from './janus';
 export { neboFetch } from './fetch';

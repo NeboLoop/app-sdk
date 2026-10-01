@@ -1,5 +1,5 @@
 let i = null, d = null;
-function l() {
+function h() {
   if (i) return i;
   if (window.location.protocol === "neboapp:")
     return i = window.location.hostname, i;
@@ -13,7 +13,7 @@ function l() {
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function y() {
+function u() {
   if (d) return d;
   if (window.location.protocol === "neboapp:")
     return d = "http://localhost:27895", d;
@@ -23,38 +23,38 @@ function y() {
 function k(s) {
   i = s;
 }
-function D(s) {
+function x(s) {
   d = s;
 }
-async function j(s, e) {
-  const t = l(), n = y();
+async function D(s, e) {
+  const t = h(), n = u();
   if (s.startsWith("http://") || s.startsWith("https://")) {
-    const u = `${n}/api/v1/apps/${t}/http/proxy`, r = {};
-    e != null && e.headers && new Headers(e.headers).forEach((E, x) => {
-      r[x] = E;
+    const f = `${n}/api/v1/apps/${t}/http/proxy`, r = {};
+    e != null && e.headers && new Headers(e.headers).forEach((E, j) => {
+      r[j] = E;
     });
-    const f = {
+    const p = {
       url: s,
       method: (e == null ? void 0 : e.method) || "GET",
       headers: r,
       body: e != null && e.body ? String(e.body) : void 0
-    }, h = await (await fetch(u, {
+    }, l = await (await fetch(f, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(f)
+      body: JSON.stringify(p)
     })).json();
-    return new Response(h.body, {
-      status: h.status,
-      headers: h.headers
+    return new Response(l.body, {
+      status: l.status,
+      headers: l.headers
     });
   }
   const a = s.startsWith("/") ? s : `/${s}`, o = `${n}/api/v1/apps/${t}/api${a}`;
   return fetch(o, e);
 }
-class $ {
+class N {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const t = l(), a = y().replace(/^http/, "ws");
+    const t = h(), a = u().replace(/^http/, "ws");
     this.url = `${a}/ws/app/${t}`, this.connect();
   }
   connect() {
@@ -93,17 +93,17 @@ class $ {
 const T = /* @__PURE__ */ new Set();
 let _ = null;
 function J() {
-  _ || (_ = new $(), _.onmessage = (s) => {
+  _ || (_ = new N(), _.onmessage = (s) => {
     let e;
     try {
       e = JSON.parse(s.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== l() || T.forEach((t) => t(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== h() || T.forEach((t) => t(e.data));
   });
 }
-function W(s) {
+function C(s) {
   if (typeof s != "string") return s;
   let e;
   try {
@@ -119,15 +119,15 @@ function W(s) {
   }
 }
 function b(s) {
-  const e = l(), t = y();
+  const e = h(), t = u();
   return s ? `${t}/api/v1/apps/${e}/storage/${encodeURIComponent(s)}` : `${t}/api/v1/apps/${e}/storage`;
 }
-const C = {
+const W = {
   async getItem(s) {
     const e = await fetch(b(s));
     if (e.status === 404) return null;
     const t = await e.json();
-    return W(t.value);
+    return C(t.value);
   },
   async setItem(s, e) {
     const t = typeof e == "string" ? e : JSON.stringify(e);
@@ -158,10 +158,10 @@ const C = {
   }
 };
 function v(s) {
-  const e = l();
-  return `${y()}/api/v1/apps/${e}/agents/${s}`;
+  const e = h();
+  return `${u()}/api/v1/apps/${e}/agents/${s}`;
 }
-const U = {
+const P = {
   async invoke(s, e) {
     return (await fetch(v("invoke"), {
       method: "POST",
@@ -188,30 +188,30 @@ const U = {
     const n = t.body.getReader(), a = new TextDecoder();
     let o = "";
     for (; ; ) {
-      const { done: u, value: r } = await n.read();
-      if (u) break;
+      const { done: f, value: r } = await n.read();
+      if (f) break;
       o += a.decode(r, { stream: !0 });
-      const f = o.split(`
+      const p = o.split(`
 `);
-      o = f.pop() || "";
-      for (const p of f)
-        if (p.startsWith("data: ")) {
-          const h = p.slice(6);
-          if (h === "[DONE]") return;
+      o = p.pop() || "";
+      for (const y of p)
+        if (y.startsWith("data: ")) {
+          const l = y.slice(6);
+          if (l === "[DONE]") return;
           try {
-            yield JSON.parse(h);
+            yield JSON.parse(l);
           } catch {
-            yield { text: h, done: !1 };
+            yield { text: l, done: !1 };
           }
         }
     }
   }
 };
 function I(s) {
-  const e = l();
-  return `${y()}/api/v1/apps/${e}/janus/${s}`;
+  const e = h();
+  return `${u()}/api/v1/apps/${e}/janus/${s}`;
 }
-const P = {
+const U = {
   async complete(s) {
     const t = await (await fetch(I("complete"), {
       method: "POST",
@@ -231,26 +231,36 @@ const P = {
     const t = e.body.getReader(), n = new TextDecoder();
     let a = "";
     for (; ; ) {
-      const { done: o, value: u } = await t.read();
+      const { done: o, value: f } = await t.read();
       if (o) break;
-      a += n.decode(u, { stream: !0 });
+      a += n.decode(f, { stream: !0 });
       const r = a.split(`
 `);
       a = r.pop() || "";
-      for (const f of r)
-        if (f.startsWith("data: ")) {
-          const p = f.slice(6);
-          if (p === "[DONE]") return;
+      for (const p of r)
+        if (p.startsWith("data: ")) {
+          const y = p.slice(6);
+          if (y === "[DONE]") return;
           try {
-            yield JSON.parse(p).text;
+            yield JSON.parse(y).text;
           } catch {
-            yield p;
+            yield y;
           }
         }
     }
   }
 };
-class F {
+async function F(s) {
+  const e = await fetch(`${u()}/api/v1/apps/${h()}/janus/decide`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(s)
+  }), t = await e.json().catch(() => ({}));
+  if (!e.ok)
+    throw new Error(t.error || `decide failed (${e.status})`);
+  return t;
+}
+class M {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -260,7 +270,7 @@ class F {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new $(), this.ws.onopen = () => {
+    this.ws || (this.ws = new N(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
       var t, n;
@@ -352,8 +362,8 @@ class F {
     return t;
   }
 }
-const O = new F();
-class M {
+const O = new M();
+class R {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -420,12 +430,12 @@ class M {
     }));
   }
 }
-const N = new M();
+const $ = new R();
 let w = null;
-const R = {
+const A = {
   async get() {
     if (w) return w;
-    const s = l(), e = y(), t = await fetch(`${e}/api/v1/apps/${s}/identity`);
+    const s = h(), e = u(), t = await fetch(`${e}/api/v1/apps/${s}/identity`);
     if (!t.ok)
       throw new Error(`[nebo-sdk] identity fetch failed: ${t.status}`);
     return w = await t.json(), w;
@@ -435,20 +445,20 @@ const R = {
   }
 };
 let c = null, S = null, g = [], m = null;
-function A(s) {
+function H(s) {
   if (!(!s.data || typeof s.data.type != "string") && s.data.type.startsWith("nebo:")) {
     s.data.type === "nebo:resize" && c && s.data.height && (c.style.height = `${s.data.height}px`);
     for (const e of g)
       e(s.data);
   }
 }
-const H = {
+const L = {
   mount(s, e) {
     c && this.unmount();
-    const t = l(), n = y(), a = new URLSearchParams();
+    const t = h(), n = u(), a = new URLSearchParams();
     e != null && e.placeholder && a.set("placeholder", e.placeholder), e != null && e.theme && a.set("theme", e.theme), e != null && e.borderless && a.set("borderless", "1"), e != null && e.contextId && a.set("ctx", e.contextId), e != null && e.scope && a.set("scope", e.scope);
-    const o = a.toString(), u = `${n}/chat-embed/${t}${o ? "?" + o : ""}`, r = document.createElement("iframe");
-    r.src = u, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), c = r, S = s, m = A, window.addEventListener("message", m);
+    const o = a.toString(), f = `${n}/chat-embed/${t}${o ? "?" + o : ""}`, r = document.createElement("iframe");
+    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), c = r, S = s, m = H, window.addEventListener("message", m);
   },
   unmount() {
     c && S && S.removeChild(c), m && (window.removeEventListener("message", m), m = null), c = null, S = null, g = [];
@@ -487,34 +497,35 @@ const H = {
     );
   }
 };
-class L {
+class q {
   constructor() {
-    this.fetch = j, this.WebSocket = $, this.storage = C, this.agents = U, this.janus = P, this.surfaces = O, this.a2ui = N, this.identity = R, this.chat = H, O._a2uiHandler = (e) => N._handleMessage(e), N._setSendFn((e) => O._rawSend(e));
+    this.fetch = D, this.WebSocket = N, this.storage = W, this.agents = P, this.janus = U, this.decide = F, this.surfaces = O, this.a2ui = $, this.identity = A, this.chat = L, O._a2uiHandler = (e) => $._handleMessage(e), $._setSendFn((e) => O._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
    */
   configure(e) {
-    e.appId && k(e.appId), e.baseUrl && D(e.baseUrl);
+    e.appId && k(e.appId), e.baseUrl && x(e.baseUrl);
   }
 }
-const B = new L();
+const z = new q();
 export {
-  M as NeboA2UI,
-  L as NeboSDK,
-  F as NeboSurfaces,
-  $ as NeboWebSocket,
-  N as a2ui,
-  U as agents,
-  H as chat,
-  l as getAppId,
-  y as getBaseUrl,
-  R as identity,
-  P as janus,
-  B as nebo,
-  j as neboFetch,
+  R as NeboA2UI,
+  q as NeboSDK,
+  M as NeboSurfaces,
+  N as NeboWebSocket,
+  $ as a2ui,
+  P as agents,
+  L as chat,
+  F as decide,
+  h as getAppId,
+  u as getBaseUrl,
+  A as identity,
+  U as janus,
+  z as nebo,
+  D as neboFetch,
   k as setAppId,
-  D as setBaseUrl,
-  C as storage,
+  x as setBaseUrl,
+  W as storage,
   O as surfaces
 };

@@ -104,6 +104,34 @@ Tips:
 - `complete(options)`: Direct LLM completion
 - `stream(options)`: Streaming LLM completion
 
+### `nebo.decide({ state, questions })`
+Typed decisions through the bot, no text generated: one call answers every
+named question about `state` (text or any JSON) with probabilities and a
+confidence. Billed to the bot owner's NeboAI account, like `nebo.janus`. The
+app's employee asks the same way with its `decide` tool.
+
+```js
+const { answers } = await nebo.decide({
+  state: { company: 'Acme', status: 'asked for a quote today' },
+  questions: {
+    tier:  { type: 'choice', instructions: 'How warm is this lead, by `status`?',
+             criteria: { hot: 'ready to buy', warm: 'interested', cold: 'not now', other: "can't tell" } },
+    fit:   { type: 'score', instructions: 'How well does `company` fit?', criteria: ['poor', 'fair', 'good'] },
+    reply: { type: 'noul', instructions: '`status` asks us for a reply.' },
+  },
+});
+// answers.tier  → { type: 'choice', choice: 'hot', confidence: 0.91, probabilities: {...} }
+// answers.fit   → { type: 'score', score: 1.6, confidence: 0.8, probabilities: {...} }  (0.0 = first level)
+// answers.reply → { type: 'noul', noul: 0.97, probabilities: {...} }  (probability it holds)
+```
+
+- `choice`: 2–255 named options; add an escape option when the set is not exhaustive.
+- `score`: 2–10 ordered levels, lowest first.
+- `noul`: one statement; no criteria.
+- The whole question lives in `instructions`; the key only names the answer.
+- Resolves to `{ model, answers, usage }`; throws with the reason when the
+  request is malformed or NeboAI is not connected.
+
 ### `nebo.chat`
 - `mount(element, options?)`: Embed chat UI
 - `unmount()`: Remove chat UI

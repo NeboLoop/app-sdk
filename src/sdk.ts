@@ -8,6 +8,7 @@ import { NeboWebSocket } from './websocket';
 import { storage } from './storage';
 import { agents } from './agents';
 import { janus } from './janus';
+import { decide } from './decide';
 import { surfaces } from './surfaces';
 import { a2ui } from './a2ui';
 import { identity } from './identity';
@@ -19,6 +20,7 @@ export class NeboSDK {
   storage = storage;
   agents = agents;
   janus = janus;
+  decide = decide;
   surfaces = surfaces;
   a2ui = a2ui;
   identity = identity;

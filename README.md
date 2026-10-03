@@ -92,6 +92,7 @@ const stop = nebo.storage.onChange((change) => {
 
 Tips:
 - Pick keys both the page and the employee can find: one key holding a list (`contacts`), or one key per record under a prefix (`contact:42`). The employee can search inside a list item by item.
+- **One record per chat.** A key the employee writes as `chat:<name>` belongs to the owner's chat it was written from, stored as `chat:<chatId>:<name>`. A page opened from a chat gets `?thread=<chatId>` in its address, so it reads that chat's record: `` const thread = new URLSearchParams(location.search).get('thread'); const design = thread && await nebo.storage.getItem(`chat:${thread}:design`); ``. Opened from home there is no `thread`; list `keys()` matching `/^chat:[^:]+:design$/` for a gallery.
 - A string that is itself valid JSON, such as `"42"` or `"true"`, comes back parsed (`42`, `true`). If the exact type matters, store it inside an object: `{ "code": "42" }`.
 - Keep each value well under 2 MB. For large or relational data, use a sidecar.
 - `setItem` and `removeItem` do not throw when the server refuses a write. If a save matters, read it back.
@@ -194,6 +195,8 @@ Some app features come from the app's `manifest.json` and standard browser APIs 
 | Want | How |
 |------|-----|
 | Full screen, landscape | `"window": { "fullscreen": true, "orientation": "landscape" }` (`orientation`: `portrait` default, `landscape`, `any`). Pad with `env(safe-area-inset-*)` and `viewport-fit=cover`. |
+| Pull down to reload (phone) | Off by default. `"window": { "pull_to_refresh": true }` turns it on, for a page that reads like a feed. Never on a canvas or a game, where a drag down is part of using it. |
+| Dictate and voice buttons in the phone's bar | `"window": { "voice": true }`. The chat's own two buttons sit at the right of the app's bar when it is opened from its chat; they drive that chat (its message box, its call), never a call of their own. Off by default; fullscreen apps have no bar. |
 | Tilt (gyroscope, accelerometer) | Add `"device:motion"` to `permissions`, then listen for `devicemotion` / `deviceorientation`. On iPhone call `DeviceMotionEvent.requestPermission()` from a tap. |
 | Video and sound | Ship the files in `ui/`. They are served with their real content types and answer range requests, so `<video muted playsinline>` plays inline on the phone and seeking works. |
 | Fast reloads | Build with content-hashed names (`main-0a8ksftt.js`): those are cached for a year, every other file is checked on each open. |

@@ -48,8 +48,8 @@ async function D(s, e) {
       headers: u.headers
     });
   }
-  const a = s.startsWith("/") ? s : `/${s}`, o = `${n}/api/v1/apps/${t}/api${a}`;
-  return fetch(o, e);
+  const a = s.startsWith("/") ? s : `/${s}`, c = `${n}/api/v1/apps/${t}/api${a}`;
+  return fetch(c, e);
 }
 class N {
   constructor(e) {
@@ -186,14 +186,14 @@ const U = {
     if (!t.body)
       throw new Error("No response body for streaming");
     const n = t.body.getReader(), a = new TextDecoder();
-    let o = "";
+    let c = "";
     for (; ; ) {
       const { done: f, value: r } = await n.read();
       if (f) break;
-      o += a.decode(r, { stream: !0 });
-      const p = o.split(`
+      c += a.decode(r, { stream: !0 });
+      const p = c.split(`
 `);
-      o = p.pop() || "";
+      c = p.pop() || "";
       for (const y of p)
         if (y.startsWith("data: ")) {
           const u = y.slice(6);
@@ -231,8 +231,8 @@ const W = {
     const t = e.body.getReader(), n = new TextDecoder();
     let a = "";
     for (; ; ) {
-      const { done: o, value: f } = await t.read();
-      if (o) break;
+      const { done: c, value: f } = await t.read();
+      if (c) break;
       a += n.decode(f, { stream: !0 });
       const r = a.split(`
 `);
@@ -261,14 +261,14 @@ async function R(s) {
   return t;
 }
 async function F(s) {
-  const e = new URLSearchParams(window.location.search).get("thread") || "", t = await fetch(`${l()}/api/v1/apps/${i()}/share`, {
+  const e = new URLSearchParams(window.location.search), t = e.get("thread") || "", n = e.get("client") || "", a = await fetch(`${l()}/api/v1/apps/${i()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: s.name, content: s.content, thread: e })
-  }), n = await t.json().catch(() => ({}));
-  if (!t.ok)
-    throw new Error(n.error || `share failed (${t.status})`);
-  return n;
+    body: JSON.stringify({ name: s.name, content: s.content, thread: t, client: n })
+  }), c = await a.json().catch(() => ({}));
+  if (!a.ok)
+    throw new Error(c.error || `share failed (${a.status})`);
+  return c;
 }
 class M {
   constructor() {
@@ -351,14 +351,14 @@ class M {
       if (n.length === 0) continue;
       const a = this.resolveParent(n);
       if (!a) continue;
-      const o = n[n.length - 1];
+      const c = n[n.length - 1];
       switch (t.op) {
         case "add":
         case "replace":
-          a[o] = t.value;
+          a[c] = t.value;
           break;
         case "remove":
-          delete a[o];
+          delete a[c];
           break;
       }
     }
@@ -454,28 +454,28 @@ const L = {
     w = null;
   }
 };
-let c = null, S = null, g = [], m = null;
+let o = null, S = null, g = [], m = null;
 function H(s) {
   if (!(!s.data || typeof s.data.type != "string") && s.data.type.startsWith("nebo:")) {
-    s.data.type === "nebo:resize" && c && s.data.height && (c.style.height = `${s.data.height}px`);
+    s.data.type === "nebo:resize" && o && s.data.height && (o.style.height = `${s.data.height}px`);
     for (const e of g)
       e(s.data);
   }
 }
 const q = {
   mount(s, e) {
-    c && this.unmount();
+    o && this.unmount();
     const t = i(), n = l(), a = new URLSearchParams();
     e != null && e.placeholder && a.set("placeholder", e.placeholder), e != null && e.theme && a.set("theme", e.theme), e != null && e.borderless && a.set("borderless", "1"), e != null && e.contextId && a.set("ctx", e.contextId), e != null && e.scope && a.set("scope", e.scope);
-    const o = a.toString(), f = `${n}/chat-embed/${t}${o ? "?" + o : ""}`, r = document.createElement("iframe");
-    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), c = r, S = s, m = H, window.addEventListener("message", m);
+    const c = a.toString(), f = `${n}/chat-embed/${t}${c ? "?" + c : ""}`, r = document.createElement("iframe");
+    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), o = r, S = s, m = H, window.addEventListener("message", m);
   },
   unmount() {
-    c && S && S.removeChild(c), m && (window.removeEventListener("message", m), m = null), c = null, S = null, g = [];
+    o && S && S.removeChild(o), m && (window.removeEventListener("message", m), m = null), o = null, S = null, g = [];
   },
   send(s) {
     var e;
-    (e = c == null ? void 0 : c.contentWindow) == null || e.postMessage(
+    (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
       { type: "nebo:send", message: s },
       "*"
     );
@@ -494,14 +494,14 @@ const q = {
    */
   setContext(s) {
     var e;
-    (e = c == null ? void 0 : c.contentWindow) == null || e.postMessage(
+    (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
       { type: "nebo:set-context", context: s },
       "*"
     );
   },
   newThread() {
     var s;
-    (s = c == null ? void 0 : c.contentWindow) == null || s.postMessage(
+    (s = o == null ? void 0 : o.contentWindow) == null || s.postMessage(
       { type: "nebo:new-thread" },
       "*"
     );

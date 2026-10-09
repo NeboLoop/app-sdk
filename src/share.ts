@@ -3,6 +3,10 @@
  * folder (beside the chat the app is open on), and Nebo opens its own Share
  * dialog on it: he chooses who can open the link (anyone, a password, only
  * him) and when it ends. The page never makes or changes a link itself.
+ *
+ * The dialog opens only on the device the page is open on: Nebo opens the
+ * page with `?client=<id>` (the screen that opened it) beside `?thread=`,
+ * and the share names it.
  */
 
 import { getAppId, getBaseUrl } from './config';
@@ -20,11 +24,13 @@ export interface Shared {
 }
 
 export async function share(file: ShareFile): Promise<Shared> {
-  const thread = new URLSearchParams(window.location.search).get('thread') || '';
+  const params = new URLSearchParams(window.location.search);
+  const thread = params.get('thread') || '';
+  const client = params.get('client') || '';
   const resp = await fetch(`${getBaseUrl()}/api/v1/apps/${getAppId()}/share`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: file.name, content: file.content, thread })
+    body: JSON.stringify({ name: file.name, content: file.content, thread, client })
   });
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok) {

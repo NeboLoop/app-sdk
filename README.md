@@ -166,6 +166,9 @@ const { artifact } = await nebo.share({ name: 'Launch deck.html', content: html 
 - `content` is the file's text (HTML, Markdown, CSV, SVG …), up to the
   bot's upload limit.
 - Sharing the same `name` again replaces the file in Work.
+- The Share dialog opens only on the device the page is open on (the screen
+  that opened it, named by the page's `?client=`), never on his other
+  devices.
 - Throws an `Error` whose message is the reason (400: a bad name or empty
   content).
 

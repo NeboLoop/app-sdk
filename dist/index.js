@@ -1,33 +1,33 @@
-let i = null, d = null;
-function h() {
-  if (i) return i;
+let d = null, h = null;
+function i() {
+  if (d) return d;
   if (window.location.protocol === "neboapp:")
-    return i = window.location.hostname, i;
+    return d = window.location.hostname, d;
   const s = window.location.pathname.match(/^\/apps\/([^/]+)\/ui/);
   if (s)
-    return i = s[1], i;
+    return d = s[1], d;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return i = e.getAttribute("content") || "", i;
+    return d = e.getAttribute("content") || "", d;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function u() {
-  if (d) return d;
+function l() {
+  if (h) return h;
   if (window.location.protocol === "neboapp:")
-    return d = "http://localhost:27895", d;
+    return h = "http://localhost:27895", h;
   const s = document.querySelector('meta[name="nebo-base-url"]');
-  return s ? (d = s.getAttribute("content") || "", d) : (d = window.location.origin, d);
+  return s ? (h = s.getAttribute("content") || "", h) : (h = window.location.origin, h);
 }
 function k(s) {
-  i = s;
-}
-function x(s) {
   d = s;
 }
+function x(s) {
+  h = s;
+}
 async function D(s, e) {
-  const t = h(), n = u();
+  const t = i(), n = l();
   if (s.startsWith("http://") || s.startsWith("https://")) {
     const f = `${n}/api/v1/apps/${t}/http/proxy`, r = {};
     e != null && e.headers && new Headers(e.headers).forEach((E, j) => {
@@ -38,14 +38,14 @@ async function D(s, e) {
       method: (e == null ? void 0 : e.method) || "GET",
       headers: r,
       body: e != null && e.body ? String(e.body) : void 0
-    }, l = await (await fetch(f, {
+    }, u = await (await fetch(f, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(p)
     })).json();
-    return new Response(l.body, {
-      status: l.status,
-      headers: l.headers
+    return new Response(u.body, {
+      status: u.status,
+      headers: u.headers
     });
   }
   const a = s.startsWith("/") ? s : `/${s}`, o = `${n}/api/v1/apps/${t}/api${a}`;
@@ -54,7 +54,7 @@ async function D(s, e) {
 class N {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const t = h(), a = u().replace(/^http/, "ws");
+    const t = i(), a = l().replace(/^http/, "ws");
     this.url = `${a}/ws/app/${t}`, this.connect();
   }
   connect() {
@@ -100,7 +100,7 @@ function J() {
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== h() || T.forEach((t) => t(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== i() || T.forEach((t) => t(e.data));
   });
 }
 function C(s) {
@@ -119,10 +119,10 @@ function C(s) {
   }
 }
 function b(s) {
-  const e = h(), t = u();
+  const e = i(), t = l();
   return s ? `${t}/api/v1/apps/${e}/storage/${encodeURIComponent(s)}` : `${t}/api/v1/apps/${e}/storage`;
 }
-const W = {
+const P = {
   async getItem(s) {
     const e = await fetch(b(s));
     if (e.status === 404) return null;
@@ -158,10 +158,10 @@ const W = {
   }
 };
 function v(s) {
-  const e = h();
-  return `${u()}/api/v1/apps/${e}/agents/${s}`;
+  const e = i();
+  return `${l()}/api/v1/apps/${e}/agents/${s}`;
 }
-const P = {
+const U = {
   async invoke(s, e) {
     return (await fetch(v("invoke"), {
       method: "POST",
@@ -196,22 +196,22 @@ const P = {
       o = p.pop() || "";
       for (const y of p)
         if (y.startsWith("data: ")) {
-          const l = y.slice(6);
-          if (l === "[DONE]") return;
+          const u = y.slice(6);
+          if (u === "[DONE]") return;
           try {
-            yield JSON.parse(l);
+            yield JSON.parse(u);
           } catch {
-            yield { text: l, done: !1 };
+            yield { text: u, done: !1 };
           }
         }
     }
   }
 };
 function I(s) {
-  const e = h();
-  return `${u()}/api/v1/apps/${e}/janus/${s}`;
+  const e = i();
+  return `${l()}/api/v1/apps/${e}/janus/${s}`;
 }
-const U = {
+const W = {
   async complete(s) {
     const t = await (await fetch(I("complete"), {
       method: "POST",
@@ -250,8 +250,8 @@ const U = {
     }
   }
 };
-async function F(s) {
-  const e = await fetch(`${u()}/api/v1/apps/${h()}/janus/decide`, {
+async function R(s) {
+  const e = await fetch(`${l()}/api/v1/apps/${i()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(s)
@@ -259,6 +259,16 @@ async function F(s) {
   if (!e.ok)
     throw new Error(t.error || `decide failed (${e.status})`);
   return t;
+}
+async function F(s) {
+  const e = new URLSearchParams(window.location.search).get("thread") || "", t = await fetch(`${l()}/api/v1/apps/${i()}/share`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: s.name, content: s.content, thread: e })
+  }), n = await t.json().catch(() => ({}));
+  if (!t.ok)
+    throw new Error(n.error || `share failed (${t.status})`);
+  return n;
 }
 class M {
   constructor() {
@@ -362,8 +372,8 @@ class M {
     return t;
   }
 }
-const O = new M();
-class R {
+const $ = new M();
+class A {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -430,12 +440,12 @@ class R {
     }));
   }
 }
-const $ = new R();
+const O = new A();
 let w = null;
-const A = {
+const L = {
   async get() {
     if (w) return w;
-    const s = h(), e = u(), t = await fetch(`${e}/api/v1/apps/${s}/identity`);
+    const s = i(), e = l(), t = await fetch(`${e}/api/v1/apps/${s}/identity`);
     if (!t.ok)
       throw new Error(`[nebo-sdk] identity fetch failed: ${t.status}`);
     return w = await t.json(), w;
@@ -452,10 +462,10 @@ function H(s) {
       e(s.data);
   }
 }
-const L = {
+const q = {
   mount(s, e) {
     c && this.unmount();
-    const t = h(), n = u(), a = new URLSearchParams();
+    const t = i(), n = l(), a = new URLSearchParams();
     e != null && e.placeholder && a.set("placeholder", e.placeholder), e != null && e.theme && a.set("theme", e.theme), e != null && e.borderless && a.set("borderless", "1"), e != null && e.contextId && a.set("ctx", e.contextId), e != null && e.scope && a.set("scope", e.scope);
     const o = a.toString(), f = `${n}/chat-embed/${t}${o ? "?" + o : ""}`, r = document.createElement("iframe");
     r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), c = r, S = s, m = H, window.addEventListener("message", m);
@@ -497,9 +507,9 @@ const L = {
     );
   }
 };
-class q {
+class B {
   constructor() {
-    this.fetch = D, this.WebSocket = N, this.storage = W, this.agents = P, this.janus = U, this.decide = F, this.surfaces = O, this.a2ui = $, this.identity = A, this.chat = L, O._a2uiHandler = (e) => $._handleMessage(e), $._setSendFn((e) => O._rawSend(e));
+    this.fetch = D, this.WebSocket = N, this.storage = P, this.agents = U, this.janus = W, this.decide = R, this.share = F, this.surfaces = $, this.a2ui = O, this.identity = L, this.chat = q, $._a2uiHandler = (e) => O._handleMessage(e), O._setSendFn((e) => $._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
@@ -508,24 +518,25 @@ class q {
     e.appId && k(e.appId), e.baseUrl && x(e.baseUrl);
   }
 }
-const z = new q();
+const G = new B();
 export {
-  R as NeboA2UI,
-  q as NeboSDK,
+  A as NeboA2UI,
+  B as NeboSDK,
   M as NeboSurfaces,
   N as NeboWebSocket,
-  $ as a2ui,
-  P as agents,
-  L as chat,
-  F as decide,
-  h as getAppId,
-  u as getBaseUrl,
-  A as identity,
-  U as janus,
-  z as nebo,
+  O as a2ui,
+  U as agents,
+  q as chat,
+  R as decide,
+  i as getAppId,
+  l as getBaseUrl,
+  L as identity,
+  W as janus,
+  G as nebo,
   D as neboFetch,
   k as setAppId,
   x as setBaseUrl,
-  W as storage,
-  O as surfaces
+  F as share,
+  P as storage,
+  $ as surfaces
 };

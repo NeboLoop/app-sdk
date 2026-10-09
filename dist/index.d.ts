@@ -10,6 +10,7 @@
  * - nebo.decide → typed decisions (choice / score / noul) with confidence
  * - nebo.surfaces → real-time agent events (AG-UI)
  * - nebo.a2ui → agent-driven UI via @a2ui/web_core (A2UI v0.9)
+ * - nebo.share → a file into the owner's Work, and Nebo's Share dialog on it
  * - nebo.identity → agent context (name, persona, skills, inputs)
  * - nebo.chat → embedded full-featured chat UI via iframe
  */
@@ -26,10 +27,12 @@ export { janus } from './janus';
 export { decide } from './decide';
 export { neboFetch } from './fetch';
 export { identity } from './identity';
+export { share } from './share';
 export { chat } from './chat';
 export { setAppId, setBaseUrl, getAppId, getBaseUrl } from './config';
 export type { AgentResponse, InvokeOptions, JanusMessage, JanusOptions, StreamChunk, DecideQuestion, DecideRequest, DecideAnswer, Decision, } from './types';
 export type { AgentIdentity } from './identity';
+export type { ShareFile, Shared } from './share';
 export type { ChatOptions, ChatContext } from './chat';
 export type { A2UIMessageProcessor } from './a2ui';
 export type { SurfaceEvent, NeboSurfaceEvent, SurfaceEventMap, RunStartedEvent, RunFinishedEvent, RunErrorEvent, TextStartEvent, TextContentEvent, TextEndEvent, ToolCallStartEvent, ToolCallEndEvent, StateSnapshotEvent, StateDeltaEvent, SurfaceCreateEvent, SurfaceUpdateEvent, SurfaceDeleteEvent, DataUpdateEvent, CustomEvent, } from './surfaces';

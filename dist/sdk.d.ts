@@ -4,6 +4,7 @@
 import { neboFetch } from './fetch';
 import { NeboWebSocket } from './websocket';
 import { decide } from './decide';
+import { share } from './share';
 export declare class NeboSDK {
     fetch: typeof neboFetch;
     WebSocket: typeof NeboWebSocket;
@@ -24,6 +25,7 @@ export declare class NeboSDK {
         stream(options: import("./types").JanusOptions): AsyncGenerator<string>;
     };
     decide: typeof decide;
+    share: typeof share;
     surfaces: import("./surfaces").NeboSurfaces;
     a2ui: import("./a2ui").NeboA2UI;
     identity: {

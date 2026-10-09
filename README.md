@@ -151,6 +151,24 @@ const { answers } = await nebo.decide({
 - Billed like any model call; see pricing at https://neboai.com/pricing.
 - Types: `DecideQuestion`, `DecideRequest`, `DecideAnswer`, `Decision`.
 
+### `nebo.share({ name, content })`
+Hand the owner a file to share. The file goes into his Work folder, beside
+the chat the app is open on, and Nebo opens its own Share dialog on it. He
+chooses who can open the link (anyone with it, a password, or only him) and
+when it ends. The link is `neboai.com/s/<token>`; an HTML file opens there as
+a live page. The page never makes or changes a link itself.
+
+```js
+const { artifact } = await nebo.share({ name: 'Launch deck.html', content: html });
+// artifact → '/api/v1/files/Design Studio/Launch deck.html'
+```
+
+- `content` is the file's text (HTML, Markdown, CSV, SVG …), up to the
+  bot's upload limit.
+- Sharing the same `name` again replaces the file in Work.
+- Throws an `Error` whose message is the reason (400: a bad name or empty
+  content).
+
 ### `nebo.chat`
 - `mount(element, options?)`: Embed chat UI
 - `unmount()`: Remove chat UI

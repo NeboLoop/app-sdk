@@ -9,6 +9,7 @@ import { storage } from './storage';
 import { agents } from './agents';
 import { janus } from './janus';
 import { decide } from './decide';
+import { share } from './share';
 import { surfaces } from './surfaces';
 import { a2ui } from './a2ui';
 import { identity } from './identity';
@@ -21,6 +22,7 @@ export class NeboSDK {
   agents = agents;
   janus = janus;
   decide = decide;
+  share = share;
   surfaces = surfaces;
   a2ui = a2ui;
   identity = identity;

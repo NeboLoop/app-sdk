@@ -11,6 +11,7 @@
  * - nebo.surfaces → real-time agent events (AG-UI)
  * - nebo.a2ui → agent-driven UI via @a2ui/web_core (A2UI v0.9)
  * - nebo.share → a file into the owner's Work, and Nebo's Share dialog on it
+ * - nebo.files → the address of an owner's file in a folder the app is granted
  * - nebo.identity → agent context (name, persona, skills, inputs)
  * - nebo.chat → embedded full-featured chat UI via iframe
  */
@@ -31,6 +32,7 @@ export { decide } from './decide';
 export { neboFetch } from './fetch';
 export { identity } from './identity';
 export { share } from './share';
+export { files } from './files';
 export { chat } from './chat';
 export { setAppId, setBaseUrl, getAppId, getBaseUrl } from './config';
 export type {

@@ -45,6 +45,9 @@ const answer = await nebo.janus.complete({
   messages: [{ role: 'user', content: 'What is 2+2?' }],
 });
 
+// Show the owner's own files (needs "filesystem:read:Media/Projects")
+video.src = nebo.files.url('Media/Projects/reel/render.mp4');
+
 // Embed chat panel
 nebo.chat.mount(document.getElementById('chat'), {
   placeholder: 'Ask about your deals...',
@@ -171,6 +174,30 @@ const { artifact } = await nebo.share({ name: 'Launch deck.html', content: html 
   devices.
 - Throws an `Error` whose message is the reason (400: a bad name or empty
   content).
+
+### `nebo.files.url(path)`
+The address of one of the owner's files, for an `<img>`, `<video>`, `<audio>`
+or `fetch()`. `path` is relative to his NeboAI folder (`~/NeboAI`) and must be
+inside a folder the app's manifest grants it:
+
+```json
+"permissions": ["storage:readwrite", "filesystem:read:Media/Projects"]
+```
+
+```js
+video.src = nebo.files.url('Media/Projects/reel/versions/reel-v3.mp4');
+const project = await fetch(nebo.files.url('Media/Projects/reel/project.json')).then((r) => r.json());
+```
+
+- The address works wherever the page is open: the desktop window, a
+  browser, the mobile app. Never build an `/api/v1/...` address yourself.
+- Read only. Files stream with byte ranges, so a video plays and seeks.
+- A path outside every granted folder is refused (403). A file that is
+  missing, hidden (a part below the granted folder starting with `.`, such as
+  `.proxies` or `.env`), or reached through a link out of the folder is not
+  found (404). To read a hidden folder, grant it by name:
+  `filesystem:read:Media/Projects/reel/.proxies`.
+- A grant is a folder inside `~/NeboAI`, relative to it, with no `..`.
 
 ### `nebo.chat`
 - `mount(element, options?)`: Embed chat UI

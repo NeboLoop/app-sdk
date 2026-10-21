@@ -18,7 +18,8 @@
   ],
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
-    "dev": "vite build --watch"
+    "dev": "vite build --watch",
+    "test": "node --test"
   },
   "peerDependencies": {
     "@a2ui/web_core": ">=0.9.0"

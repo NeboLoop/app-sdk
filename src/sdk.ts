@@ -10,6 +10,7 @@ import { agents } from './agents';
 import { janus } from './janus';
 import { decide } from './decide';
 import { share } from './share';
+import { files } from './files';
 import { surfaces } from './surfaces';
 import { a2ui } from './a2ui';
 import { identity } from './identity';
@@ -23,6 +24,7 @@ export class NeboSDK {
   janus = janus;
   decide = decide;
   share = share;
+  files = files;
   surfaces = surfaces;
   a2ui = a2ui;
   identity = identity;

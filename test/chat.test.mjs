@@ -60,19 +60,30 @@ test('the socket events of the app own conversations, and nothing else', () => {
   const heard = [];
   const off = nebo.chat.onMessage((e) => heard.push(e));
   const say = (type, data) => sockets[0].onmessage({ data: JSON.stringify({ type, data }) });
-  say('chat_stream', { session_id: 'agent:app-1:app', content: 'He' });
-  say('chat_stream', { session_id: 'agent:app-1:app:deal-7', content: 'llo' });
+  say('chat_stream', { session_id: 'agent:app-1:page', content: 'He' });
+  say('chat_stream', { session_id: 'agent:app-1:page:deal-7', content: 'llo' });
   say('chat_stream', { session_id: 'agent:app-1:web', content: 'the owner' });
-  say('chat_stream', { session_id: 'agent:app-2:app', content: 'another app' });
-  say('chat_complete', { session_id: 'agent:app-1:app', stop_reason: 'queued_into_running_turn' });
-  say('chat_complete', { session_id: 'agent:app-1:app' });
-  say('chat_cancelled', { session_id: 'agent:app-1:app:deal-7' });
+  say('chat_stream', { session_id: 'agent:app-1:app', content: 'the old embed, the owner own' });
+  say('chat_stream', { session_id: 'agent:app-2:page', content: 'another app' });
+  say('chat_complete', { session_id: 'agent:app-1:page', stop_reason: 'queued_into_running_turn' });
+  say('chat_complete', { session_id: 'agent:app-1:page' });
+  say('chat_cancelled', { session_id: 'agent:app-1:page:deal-7' });
   off();
-  say('chat_stream', { session_id: 'agent:app-1:app', content: 'after' });
+  say('chat_stream', { session_id: 'agent:app-1:page', content: 'after' });
   assert.deepEqual(heard, [
     { type: 'stream', thread: undefined, text: 'He' },
     { type: 'stream', thread: 'deal-7', text: 'llo' },
     { type: 'complete', thread: undefined, notice: undefined },
     { type: 'stopped', thread: 'deal-7' }
   ]);
+});
+
+test('waiting and a reconnect reach the listeners', () => {
+  const heard = [];
+  const off = nebo.chat.onMessage((e) => heard.push(e));
+  sockets[0].onopen?.({});
+  sockets[0].onmessage({ data: JSON.stringify({ type: 'chat_waiting', data: { session_id: 'agent:app-1:page' } }) });
+  sockets[0].onopen?.({});
+  off();
+  assert.deepEqual(heard, [{ type: 'waiting', thread: undefined }, { type: 'reconnected' }]);
 });

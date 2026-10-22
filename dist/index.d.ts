@@ -30,7 +30,7 @@ export { neboFetch } from './fetch';
 export { identity } from './identity';
 export { share } from './share';
 export { files } from './files';
-export { chat } from './chat';
+export { chat, ChatError } from './chat';
 export { setAppId, setBaseUrl, getAppId, getBaseUrl } from './config';
 export type { AgentResponse, InvokeOptions, JanusMessage, JanusOptions, StreamChunk, DecideQuestion, DecideRequest, DecideAnswer, Decision, } from './types';
 export type { AgentIdentity } from './identity';

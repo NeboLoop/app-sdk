@@ -6,7 +6,7 @@
  * socket. What the page sends is the app's words, never the owner's: no
  * install codes, slash commands or @mentions of other employees, and the
  * employee works as it does for any app request. The conversation is the
- * employee's too: the owner reads it among its chats in Nebo.
+ * app's own: the owner's chats in Nebo never write into it.
  *
  * Use the primitives (`history`, `send`, `stop`, `onMessage`) to draw your
  * own chat, or `mount(element)` for a ready one.
@@ -35,6 +35,8 @@ export interface ChatHistory {
     messages: ChatMessage[];
     /** A turn is running: its reply is on the way. */
     running: boolean;
+    /** The running turn waits on the owner (his OK, or his answer). */
+    waiting: boolean;
     hasMore: boolean;
 }
 /** What the conversation hears, live. */
@@ -59,6 +61,16 @@ export type ChatEvent = {
 } | {
     type: 'stopped';
     thread?: string;
+}
+/** The turn waits on the owner's OK: nothing more streams until he answers. */
+ | {
+    type: 'waiting';
+    thread?: string;
+}
+/** The live connection came back: anything may have happened meanwhile,
+ *  so read the history again. Names no thread. */
+ | {
+    type: 'reconnected';
 };
 /**
  * What the app says about what is on its page, read beside every message
@@ -83,6 +95,12 @@ export interface SendOptions {
     scope?: string;
 }
 type Handler = (event: ChatEvent) => void;
+/** A refused chat call: `status` 409 when the employee is turned off or
+ *  still answering (its `message` says which, in words for the owner). */
+export declare class ChatError extends Error {
+    status: number;
+    constructor(status: number, message: string);
+}
 export declare const chat: {
     /** The conversation so far, oldest first (the last 50, or `limit`). */
     history(options?: {
@@ -90,7 +108,9 @@ export declare const chat: {
         before?: string;
         limit?: number;
     }): Promise<ChatHistory>;
-    /** Say something to the employee. The reply arrives through `onMessage`. */
+    /** Say something to the employee. The reply arrives through `onMessage`.
+     *  One message at a time: while a reply is on its way, a send is refused
+     *  (stop it or wait). */
     send(message: string, options?: SendOptions): Promise<void>;
     /** Stop the turn running in the conversation. */
     stop(options?: {

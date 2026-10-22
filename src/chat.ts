@@ -6,7 +6,7 @@
  * socket. What the page sends is the app's words, never the owner's: no
  * install codes, slash commands or @mentions of other employees, and the
  * employee works as it does for any app request. The conversation is the
- * employee's too: the owner reads it among its chats in Nebo.
+ * app's own: the owner's chats in Nebo never write into it.
  *
  * Use the primitives (`history`, `send`, `stop`, `onMessage`) to draw your
  * own chat, or `mount(element)` for a ready one.
@@ -41,6 +41,8 @@ export interface ChatHistory {
   messages: ChatMessage[];
   /** A turn is running: its reply is on the way. */
   running: boolean;
+  /** The running turn waits on the owner (his OK, or his answer). */
+  waiting: boolean;
   hasMore: boolean;
 }
 
@@ -51,7 +53,12 @@ export type ChatEvent =
   /** The turn ended; `notice` says why when it stopped early. */
   | { type: 'complete'; thread?: string; notice?: string }
   | { type: 'error'; thread?: string; error: string }
-  | { type: 'stopped'; thread?: string };
+  | { type: 'stopped'; thread?: string }
+  /** The turn waits on the owner's OK: nothing more streams until he answers. */
+  | { type: 'waiting'; thread?: string }
+  /** The live connection came back: anything may have happened meanwhile,
+   *  so read the history again. Names no thread. */
+  | { type: 'reconnected' };
 
 /**
  * What the app says about what is on its page, read beside every message
@@ -81,10 +88,10 @@ function chatUrl(rest = ''): string {
   return `${getBaseUrl()}/api/v1/apps/${encodeURIComponent(getAppId())}/chat${rest}`;
 }
 
-/** The thread a conversation key names: `agent:<id>:app[:<thread>]`. */
+/** The thread a conversation key names: `agent:<id>:page[:<thread>]`. */
 function threadOf(key: unknown): string | undefined | null {
   if (typeof key !== 'string') return null;
-  const base = `agent:${getAppId()}:app`;
+  const base = `agent:${getAppId()}:page`;
   if (key === base) return undefined;
   if (key.startsWith(base + ':')) return key.slice(base.length + 1);
   return null;
@@ -94,9 +101,18 @@ function emit(event: ChatEvent): void {
   handlers.forEach((h) => h(event));
 }
 
+let opened = false;
+
+/** The app's socket, open from the first use of `nebo.chat` until the last
+ *  listener and the mounted chat are gone. */
 function listen(): void {
   if (socket) return;
+  opened = false;
   socket = new NeboWebSocket();
+  socket.onopen = () => {
+    if (opened) emit({ type: 'reconnected' });
+    opened = true;
+  };
   socket.onmessage = (msg) => {
     let parsed: { type?: string; data?: Record<string, unknown> };
     try {
@@ -135,8 +151,19 @@ function listen(): void {
       case 'chat_cancelled':
         emit({ type: 'stopped', thread });
         break;
+      case 'chat_waiting':
+        emit({ type: 'waiting', thread });
+        break;
     }
   };
+}
+
+/** A refused chat call: `status` 409 when the employee is turned off or
+ *  still answering (its `message` says which, in words for the owner). */
+export class ChatError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
 }
 
 async function post(rest: string, body: unknown): Promise<Response> {
@@ -145,7 +172,7 @@ async function post(rest: string, body: unknown): Promise<Response> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-  if (!resp.ok) throw new Error((await resp.text()) || `chat: ${resp.status}`);
+  if (!resp.ok) throw new ChatError(resp.status, (await resp.text()) || `chat: ${resp.status}`);
   return resp;
 }
 
@@ -157,13 +184,16 @@ export const chat = {
     if (options?.before) q.set('before', options.before);
     if (options?.limit) q.set('limit', String(options.limit));
     const qs = q.toString();
+    listen();
     const resp = await fetch(chatUrl(qs ? `?${qs}` : ''));
     if (!resp.ok) throw new Error((await resp.text()) || `chat: ${resp.status}`);
     const body = await resp.json();
-    return { messages: body.messages ?? [], running: !!body.running, hasMore: !!body.hasMore };
+    return { messages: body.messages ?? [], running: !!body.running, waiting: !!body.waiting, hasMore: !!body.hasMore };
   },
 
-  /** Say something to the employee. The reply arrives through `onMessage`. */
+  /** Say something to the employee. The reply arrives through `onMessage`.
+   *  One message at a time: while a reply is on its way, a send is refused
+   *  (stop it or wait). */
   async send(message: string, options?: SendOptions): Promise<void> {
     listen();
     await post('', { message, thread: options?.thread, scope: options?.scope, context });
@@ -171,13 +201,15 @@ export const chat = {
 
   /** Stop the turn running in the conversation. */
   async stop(options?: { thread?: string }): Promise<void> {
+    listen();
     await post('/stop', { thread: options?.thread });
   },
 
   /** Start the conversation over; the one before stays with the owner. */
   async newThread(options?: { thread?: string }): Promise<void> {
+    listen();
     await post('/new', { thread: options?.thread });
-    mounted?.reset();
+    if (mounted && mounted.thread === (options?.thread || undefined)) mounted.reset();
   },
 
   /** Hear the conversation live: words sent (from any open view), the
@@ -185,7 +217,10 @@ export const chat = {
   onMessage(handler: Handler): () => void {
     listen();
     handlers.add(handler);
-    return () => handlers.delete(handler);
+    return () => {
+      handlers.delete(handler);
+      closeIfUnused();
+    };
   },
 
   /** What is on the page, sent beside every message. `null` clears it. */
@@ -202,12 +237,20 @@ export const chat = {
   unmount(): void {
     mounted?.destroy();
     mounted = null;
+    closeIfUnused();
   }
 };
+
+function closeIfUnused(): void {
+  if (handlers.size || mounted || !socket) return;
+  socket.close();
+  socket = null;
+}
 
 // ── The mounted chat ────────────────────────────────────────────────────
 
 interface Mounted {
+  thread?: string;
   reset(): void;
   destroy(): void;
 }
@@ -229,6 +272,8 @@ const STYLE = `
 .nebo-chat__msg--user{align-self:flex-end;background:var(--nc-me);color:var(--nc-me-fg);border-bottom-right-radius:6px}
 .nebo-chat__msg--assistant{align-self:flex-start;background:var(--nc-them);border-bottom-left-radius:6px}
 .nebo-chat__msg--error{align-self:center;background:transparent;color:#dc2626;font-size:14px;padding:4px 8px}
+
+.nebo-chat__msg--waiting{color:var(--nc-muted);font-size:14px}
 .nebo-chat__msg--note{align-self:center;background:transparent;color:var(--nc-muted);font-size:14px;padding:4px 8px}
 .nebo-chat__msg code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(127,127,127,.15);padding:1px 5px;border-radius:5px}
 .nebo-chat__msg a{color:inherit;text-decoration:underline}
@@ -332,6 +377,12 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
     log.appendChild(node);
     return node;
   };
+  /** The turn waits on the owner's OK: said in the reply's place. */
+  const setWaiting = () => {
+    if (!reply || reply.text) return;
+    reply.node.classList.add('nebo-chat__msg--waiting');
+    reply.node.textContent = options.name ? `${options.name} is waiting for your OK in Nebo.` : 'Waiting for your OK in Nebo.';
+  };
   const setRunning = (on: boolean) => {
     running = on;
     button.textContent = on ? 'Stop' : 'Send';
@@ -354,12 +405,14 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
   };
 
   const load = async () => {
+    setRunning(false);
     log.textContent = '';
     try {
       const h = await chat.history({ thread });
       for (const m of h.messages) bubble(m.role, m.content);
       showEmpty();
       setRunning(h.running);
+      if (h.running && h.waiting) setWaiting();
       scroll(true);
     } catch {
       bubble('error', 'Could not load the conversation. Try again.');
@@ -367,8 +420,15 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
   };
 
   const off = chat.onMessage((e) => {
+    if (e.type === 'reconnected') {
+      void load();
+      return;
+    }
     if (e.thread !== thread) return;
-    if (e.type === 'message') {
+    if (e.type === 'waiting') {
+      if (!reply) setRunning(true);
+      setWaiting();
+    } else if (e.type === 'message') {
       // The words this view sent are drawn already; another view's arrive.
       if (!running) {
         bubble('user', e.message.content);
@@ -378,6 +438,7 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
       if (!reply) setRunning(true);
       if (reply) {
         reply.text += e.text;
+        reply.node.classList.remove('nebo-chat__msg--waiting');
         reply.node.textContent = '';
         render(reply.node, reply.text);
         scroll();
@@ -409,9 +470,9 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
     setRunning(true);
     try {
       await chat.send(text, { thread, scope: options.scope });
-    } catch {
+    } catch (e) {
       setRunning(false);
-      bubble('error', 'Could not send. Try again.');
+      bubble('error', e instanceof ChatError && e.status === 409 ? e.message : 'Could not send. Try again.');
     }
   };
 
@@ -431,6 +492,7 @@ function mountChat(element: HTMLElement, options: ChatOptions): Mounted {
   void load();
 
   return {
+    thread,
     reset() {
       log.textContent = '';
       setRunning(false);

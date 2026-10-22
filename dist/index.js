@@ -1,58 +1,58 @@
-let b = null, y = null;
+let y = null, w = null;
 function p() {
-  if (b) return b;
+  if (y) return y;
   if (window.location.protocol === "neboapp:")
-    return b = window.location.hostname, b;
+    return y = window.location.hostname, y;
   const t = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
   if (t)
-    return b = decodeURIComponent(t[1]), b;
+    return y = decodeURIComponent(t[1]), y;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return b = e.getAttribute("content") || "", b;
+    return y = e.getAttribute("content") || "", y;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function f() {
-  if (y) return y;
+function m() {
+  if (w) return w;
   const t = document.querySelector('meta[name="nebo-base-url"]');
-  return t ? (y = t.getAttribute("content") || "", y) : window.location.protocol === "neboapp:" ? (y = "http://localhost:27895", y) : (y = window.location.origin, y);
+  return t ? (w = t.getAttribute("content") || "", w) : window.location.protocol === "neboapp:" ? (w = "http://localhost:27895", w) : (w = window.location.origin, w);
 }
-function Q(t) {
-  b = t;
-}
-function V(t) {
+function ee(t) {
   y = t;
 }
-async function X(t, e) {
-  const n = p(), a = f();
+function te(t) {
+  w = t;
+}
+async function ne(t, e) {
+  const n = p(), a = m();
   if (t.startsWith("http://") || t.startsWith("https://")) {
-    const d = `${a}/api/v1/apps/${n}/http/proxy`, c = {};
-    e != null && e.headers && new Headers(e.headers).forEach((E, x) => {
-      c[x] = E;
+    const d = `${a}/api/v1/apps/${n}/http/proxy`, i = {};
+    e != null && e.headers && new Headers(e.headers).forEach((I, k) => {
+      i[k] = I;
     });
     const l = {
       url: t,
       method: (e == null ? void 0 : e.method) || "GET",
-      headers: c,
+      headers: i,
       body: e != null && e.body ? String(e.body) : void 0
-    }, i = await (await fetch(d, {
+    }, c = await (await fetch(d, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(l)
     })).json();
-    return new Response(i.body, {
-      status: i.status,
-      headers: i.headers
+    return new Response(c.body, {
+      status: c.status,
+      headers: c.headers
     });
   }
   const s = t.startsWith("/") ? t : `/${t}`, o = `${a}/api/v1/apps/${n}/api${s}`;
   return fetch(o, e);
 }
-class T {
+class N {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const n = p(), s = f().replace(/^http/, "ws");
+    const n = p(), s = m().replace(/^http/, "ws");
     this.url = `${s}/ws/app/${n}`, this.connect();
   }
   connect() {
@@ -88,20 +88,20 @@ class T {
     this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, n);
   }
 }
-const J = /* @__PURE__ */ new Set();
-let N = null;
-function Z() {
-  N || (N = new T(), N.onmessage = (t) => {
+const W = /* @__PURE__ */ new Set();
+let D = null;
+function ae() {
+  D || (D = new N(), D.onmessage = (t) => {
     let e;
     try {
       e = JSON.parse(t.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== p() || J.forEach((n) => n(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== p() || W.forEach((n) => n(e.data));
   });
 }
-function ee(t) {
+function se(t) {
   if (typeof t != "string") return t;
   let e;
   try {
@@ -116,52 +116,52 @@ function ee(t) {
     return e;
   }
 }
-function C(t) {
-  const e = p(), n = f();
+function T(t) {
+  const e = p(), n = m();
   return t ? `${n}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${n}/api/v1/apps/${e}/storage`;
 }
-const te = {
+const re = {
   async getItem(t) {
-    const e = await fetch(C(t));
+    const e = await fetch(T(t));
     if (e.status === 404) return null;
     const n = await e.json();
-    return ee(n.value);
+    return se(n.value);
   },
   async setItem(t, e) {
     const n = typeof e == "string" ? e : JSON.stringify(e);
-    await fetch(C(t), {
+    await fetch(T(t), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value: n })
     });
   },
   async removeItem(t) {
-    await fetch(C(t), { method: "DELETE" });
+    await fetch(T(t), { method: "DELETE" });
   },
   async clear() {
     const t = await this.keys();
     await Promise.all(t.map((e) => this.removeItem(e)));
   },
   async keys() {
-    return ((await (await fetch(C())).json()).items || []).map((n) => n[0]);
+    return ((await (await fetch(T())).json()).items || []).map((n) => n[0]);
   },
   /**
    * Call `handler` after every change to the store: the employee's writes
    * and other open views'. Returns a function that stops listening.
    */
   onChange(t) {
-    return J.add(t), Z(), () => {
-      J.delete(t);
+    return W.add(t), ae(), () => {
+      W.delete(t);
     };
   }
 };
-function W(t) {
+function H(t) {
   const e = p();
-  return `${f()}/api/v1/apps/${e}/agents/${t}`;
+  return `${m()}/api/v1/apps/${e}/agents/${t}`;
 }
-const ne = {
+const oe = {
   async invoke(t, e) {
-    return (await fetch(W("invoke"), {
+    return (await fetch(H("invoke"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -172,7 +172,7 @@ const ne = {
     })).json();
   },
   async *stream(t, e) {
-    const n = await fetch(W("stream"), {
+    const n = await fetch(H("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -186,32 +186,32 @@ const ne = {
     const a = n.body.getReader(), s = new TextDecoder();
     let o = "";
     for (; ; ) {
-      const { done: d, value: c } = await a.read();
+      const { done: d, value: i } = await a.read();
       if (d) break;
-      o += s.decode(c, { stream: !0 });
+      o += s.decode(i, { stream: !0 });
       const l = o.split(`
 `);
       o = l.pop() || "";
       for (const h of l)
         if (h.startsWith("data: ")) {
-          const i = h.slice(6);
-          if (i === "[DONE]") return;
+          const c = h.slice(6);
+          if (c === "[DONE]") return;
           try {
-            yield JSON.parse(i);
+            yield JSON.parse(c);
           } catch {
-            yield { text: i, done: !1 };
+            yield { text: c, done: !1 };
           }
         }
     }
   }
 };
-function F(t) {
+function q(t) {
   const e = p();
-  return `${f()}/api/v1/apps/${e}/janus/${t}`;
+  return `${m()}/api/v1/apps/${e}/janus/${t}`;
 }
-const ae = {
+const ce = {
   async complete(t) {
-    const n = await (await fetch(F("complete"), {
+    const n = await (await fetch(q("complete"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(t)
@@ -219,7 +219,7 @@ const ae = {
     return n.text || n.content || "";
   },
   async *stream(t) {
-    const e = await fetch(F("stream"), {
+    const e = await fetch(q("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(t)
@@ -232,10 +232,10 @@ const ae = {
       const { done: o, value: d } = await n.read();
       if (o) break;
       s += a.decode(d, { stream: !0 });
-      const c = s.split(`
+      const i = s.split(`
 `);
-      s = c.pop() || "";
-      for (const l of c)
+      s = i.pop() || "";
+      for (const l of i)
         if (l.startsWith("data: ")) {
           const h = l.slice(6);
           if (h === "[DONE]") return;
@@ -248,8 +248,8 @@ const ae = {
     }
   }
 };
-async function se(t) {
-  const e = await fetch(`${f()}/api/v1/apps/${p()}/janus/decide`, {
+async function ie(t) {
+  const e = await fetch(`${m()}/api/v1/apps/${p()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(t)
@@ -258,8 +258,8 @@ async function se(t) {
     throw new Error(n.error || `decide failed (${e.status})`);
   return n;
 }
-async function re(t) {
-  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${f()}/api/v1/apps/${p()}/share`, {
+async function de(t) {
+  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${m()}/api/v1/apps/${p()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: t.name, content: t.content, thread: n, client: a })
@@ -268,7 +268,7 @@ async function re(t) {
     throw new Error(o.error || `share failed (${s.status})`);
   return o;
 }
-const oe = {
+const le = {
   /**
    * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
    * part names nothing inside a granted folder and is refused here.
@@ -278,10 +278,10 @@ const oe = {
     if (e.some((s) => s === "." || s === ".."))
       throw new Error(`[nebo-sdk] files.url: "${t}" climbs out of its folder; name the file inside the granted folder`);
     const n = encodeURIComponent(p()), a = e.map(encodeURIComponent).join("/");
-    return `${f()}/api/v1/apps/${n}/files/${a}`;
+    return `${m()}/api/v1/apps/${n}/files/${a}`;
   }
 };
-class ce {
+class he {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -291,7 +291,7 @@ class ce {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new T(), this.ws.onopen = () => {
+    this.ws || (this.ws = new N(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
       var n, a;
@@ -383,8 +383,8 @@ class ce {
     return n;
   }
 }
-const I = new ce();
-class ie {
+const U = new he();
+class ue {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -451,46 +451,49 @@ class ie {
     }));
   }
 }
-const j = new ie();
-let S = null;
-const de = {
+const J = new ue();
+let $ = null;
+const pe = {
   async get() {
-    if (S) return S;
-    const t = p(), e = f(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
+    if ($) return $;
+    const t = p(), e = m(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
     if (!n.ok)
       throw new Error(`[nebo-sdk] identity fetch failed: ${n.status}`);
-    return S = await n.json(), S;
+    return $ = await n.json(), $;
   },
   invalidate() {
-    S = null;
+    $ = null;
   }
-}, R = /* @__PURE__ */ new Set();
-let D = null, H = null;
-function B(t = "") {
-  return `${f()}/api/v1/apps/${encodeURIComponent(p())}/chat${t}`;
+}, O = /* @__PURE__ */ new Set();
+let v = null, B = null;
+function Q(t = "") {
+  return `${m()}/api/v1/apps/${encodeURIComponent(p())}/chat${t}`;
 }
-function le(t) {
+function fe(t) {
   if (typeof t != "string") return null;
-  const e = `agent:${p()}:app`;
+  const e = `agent:${p()}:page`;
   if (t !== e)
     return t.startsWith(e + ":") ? t.slice(e.length + 1) : null;
 }
-function k(t) {
-  R.forEach((e) => e(t));
+function x(t) {
+  O.forEach((e) => e(t));
 }
-function L() {
-  D || (D = new T(), D.onmessage = (t) => {
+let R = !1;
+function C() {
+  v || (R = !1, v = new N(), v.onopen = () => {
+    R && x({ type: "reconnected" }), R = !0;
+  }, v.onmessage = (t) => {
     let e;
     try {
       e = JSON.parse(t.data);
     } catch {
       return;
     }
-    const n = e.data ?? {}, a = le(n.session_id);
+    const n = e.data ?? {}, a = fe(n.session_id);
     if (a !== null)
       switch (e.type) {
         case "chat_user_message":
-          k({
+          x({
             type: "message",
             thread: a,
             message: {
@@ -502,71 +505,88 @@ function L() {
           });
           break;
         case "chat_stream":
-          typeof n.content == "string" && n.content && k({ type: "stream", thread: a, text: n.content });
+          typeof n.content == "string" && n.content && x({ type: "stream", thread: a, text: n.content });
           break;
         case "chat_complete":
           if (n.stop_reason === "queued_into_running_turn") break;
-          k({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
+          x({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
           break;
         case "chat_error":
-          k({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
+          x({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
           break;
         case "chat_cancelled":
-          k({ type: "stopped", thread: a });
+          x({ type: "stopped", thread: a });
+          break;
+        case "chat_waiting":
+          x({ type: "waiting", thread: a });
           break;
       }
   });
 }
-async function U(t, e) {
-  const n = await fetch(B(t), {
+class V extends Error {
+  constructor(e, n) {
+    super(n), this.status = e;
+  }
+}
+async function P(t, e) {
+  const n = await fetch(Q(t), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(e)
   });
-  if (!n.ok) throw new Error(await n.text() || `chat: ${n.status}`);
+  if (!n.ok) throw new V(n.status, await n.text() || `chat: ${n.status}`);
   return n;
 }
-const $ = {
+const E = {
   /** The conversation so far, oldest first (the last 50, or `limit`). */
   async history(t) {
     const e = new URLSearchParams();
     t != null && t.thread && e.set("thread", t.thread), t != null && t.before && e.set("before", t.before), t != null && t.limit && e.set("limit", String(t.limit));
-    const n = e.toString(), a = await fetch(B(n ? `?${n}` : ""));
+    const n = e.toString();
+    C();
+    const a = await fetch(Q(n ? `?${n}` : ""));
     if (!a.ok) throw new Error(await a.text() || `chat: ${a.status}`);
     const s = await a.json();
-    return { messages: s.messages ?? [], running: !!s.running, hasMore: !!s.hasMore };
+    return { messages: s.messages ?? [], running: !!s.running, waiting: !!s.waiting, hasMore: !!s.hasMore };
   },
-  /** Say something to the employee. The reply arrives through `onMessage`. */
+  /** Say something to the employee. The reply arrives through `onMessage`.
+   *  One message at a time: while a reply is on its way, a send is refused
+   *  (stop it or wait). */
   async send(t, e) {
-    L(), await U("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: H });
+    C(), await P("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: B });
   },
   /** Stop the turn running in the conversation. */
   async stop(t) {
-    await U("/stop", { thread: t == null ? void 0 : t.thread });
+    C(), await P("/stop", { thread: t == null ? void 0 : t.thread });
   },
   /** Start the conversation over; the one before stays with the owner. */
   async newThread(t) {
-    await U("/new", { thread: t == null ? void 0 : t.thread }), u == null || u.reset();
+    C(), await P("/new", { thread: t == null ? void 0 : t.thread }), u && u.thread === ((t == null ? void 0 : t.thread) || void 0) && u.reset();
   },
   /** Hear the conversation live: words sent (from any open view), the
    *  reply as it streams, and how each turn ends. Returns an unsubscribe. */
   onMessage(t) {
-    return L(), R.add(t), () => R.delete(t);
+    return C(), O.add(t), () => {
+      O.delete(t), K();
+    };
   },
   /** What is on the page, sent beside every message. `null` clears it. */
   setContext(t) {
-    H = t;
+    B = t;
   },
   /** A ready chat with the employee, drawn inside `element`. */
   mount(t, e) {
-    u == null || u.destroy(), u = ue(t, e ?? {});
+    u == null || u.destroy(), u = be(t, e ?? {});
   },
   unmount() {
-    u == null || u.destroy(), u = null;
+    u == null || u.destroy(), u = null, K();
   }
 };
+function K() {
+  O.size || u || !v || (v.close(), v = null);
+}
 let u = null;
-const q = "nebo-chat-style", he = `
+const G = "nebo-chat-style", me = `
 .nebo-chat{--nc-bg:#fff;--nc-fg:#16181d;--nc-muted:#6b7280;--nc-line:#e5e7eb;--nc-me:#16181d;--nc-me-fg:#fff;--nc-them:#f3f4f6;--nc-accent:#4f46e5;
   display:flex;flex-direction:column;height:100%;min-height:0;background:var(--nc-bg);color:var(--nc-fg);
   font:16px/1.6 "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--nc-line);border-radius:12px;overflow:hidden;box-sizing:border-box}
@@ -580,6 +600,8 @@ const q = "nebo-chat-style", he = `
 .nebo-chat__msg--user{align-self:flex-end;background:var(--nc-me);color:var(--nc-me-fg);border-bottom-right-radius:6px}
 .nebo-chat__msg--assistant{align-self:flex-start;background:var(--nc-them);border-bottom-left-radius:6px}
 .nebo-chat__msg--error{align-self:center;background:transparent;color:#dc2626;font-size:14px;padding:4px 8px}
+
+.nebo-chat__msg--waiting{color:var(--nc-muted);font-size:14px}
 .nebo-chat__msg--note{align-self:center;background:transparent;color:var(--nc-muted);font-size:14px;padding:4px 8px}
 .nebo-chat__msg code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(127,127,127,.15);padding:1px 5px;border-radius:5px}
 .nebo-chat__msg a{color:inherit;text-decoration:underline}
@@ -595,16 +617,16 @@ const q = "nebo-chat-style", he = `
 .nebo-chat__button:disabled{opacity:.4;cursor:default}
 .nebo-chat__button--stop{background:var(--nc-fg);color:var(--nc-bg)}
 `;
-function pe() {
-  if (document.getElementById(q)) return;
+function ge() {
+  if (document.getElementById(G)) return;
   const t = document.createElement("style");
-  t.id = q, t.textContent = he, document.head.appendChild(t);
+  t.id = G, t.textContent = me, document.head.appendChild(t);
 }
-function g(t, e) {
+function b(t, e) {
   const n = document.createElement(t);
   return n.className = e, n;
 }
-function z(t, e) {
+function Y(t, e) {
   t.textContent = "";
   const n = /(`[^`\n]+`|\*\*[^*\n]+\*\*|https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/g;
   let a = 0;
@@ -617,114 +639,122 @@ function z(t, e) {
     else if (d.startsWith("**"))
       t.appendChild(document.createElement("strong")).textContent = d.slice(2, -2);
     else {
-      const c = t.appendChild(document.createElement("a"));
-      c.href = d, c.target = "_blank", c.rel = "noopener noreferrer", c.textContent = d;
+      const i = t.appendChild(document.createElement("a"));
+      i.href = d, i.target = "_blank", i.rel = "noopener noreferrer", i.textContent = d;
     }
     a = o + d.length;
   }
   a < e.length && t.appendChild(document.createTextNode(e.slice(a)));
 }
-function ue(t, e) {
-  pe();
-  const n = e.contextId || void 0, a = e.theme ?? "auto", s = g("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
+function be(t, e) {
+  ge();
+  const n = e.contextId || void 0, a = e.theme ?? "auto", s = b("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
   e.height && (s.style.height = e.height);
-  const o = g("div", "nebo-chat__log");
+  const o = b("div", "nebo-chat__log");
   o.setAttribute("role", "log"), o.setAttribute("aria-live", "polite");
-  const d = g("form", "nebo-chat__composer"), c = g("textarea", "nebo-chat__input");
-  c.rows = 1, c.setAttribute("aria-label", "Message"), c.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
-  const l = g("button", "nebo-chat__button");
-  l.type = "submit", d.append(c, l), s.append(o, d), t.appendChild(s);
-  let h = !1, i = null;
-  const _ = g("div", "nebo-chat__empty");
-  _.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
-  const E = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, x = (r = !1) => {
-    (r || E()) && (o.scrollTop = o.scrollHeight);
-  }, P = () => {
-    o.querySelector(".nebo-chat__msg") ? _.remove() : o.appendChild(_);
-  }, w = (r, v) => {
-    _.remove();
-    const O = g("div", `nebo-chat__msg nebo-chat__msg--${r}`);
-    return z(O, v), o.appendChild(O), O;
-  }, G = () => {
-    const r = g("div", "nebo-chat__msg nebo-chat__msg--assistant");
-    return r.appendChild(g("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), _.remove(), o.appendChild(r), r;
-  }, m = (r) => {
-    h = r, l.textContent = r ? "Stop" : "Send", l.classList.toggle("nebo-chat__button--stop", r), l.disabled = !r && !c.value.trim(), r && !i && (i = { node: G(), text: "" }, x(!0)), r || (i && !i.text && i.node.remove(), i = null, P());
+  const d = b("form", "nebo-chat__composer"), i = b("textarea", "nebo-chat__input");
+  i.rows = 1, i.setAttribute("aria-label", "Message"), i.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
+  const l = b("button", "nebo-chat__button");
+  l.type = "submit", d.append(i, l), s.append(o, d), t.appendChild(s);
+  let h = !1, c = null;
+  const S = b("div", "nebo-chat__empty");
+  S.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
+  const I = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, k = (r = !1) => {
+    (r || I()) && (o.scrollTop = o.scrollHeight);
   }, A = () => {
-    c.style.height = "auto", c.style.height = `${Math.min(c.scrollHeight, 160)}px`, h || (l.disabled = !c.value.trim());
-  }, K = async () => {
-    o.textContent = "";
+    o.querySelector(".nebo-chat__msg") ? S.remove() : o.appendChild(S);
+  }, _ = (r, g) => {
+    S.remove();
+    const j = b("div", `nebo-chat__msg nebo-chat__msg--${r}`);
+    return Y(j, g), o.appendChild(j), j;
+  }, X = () => {
+    const r = b("div", "nebo-chat__msg nebo-chat__msg--assistant");
+    return r.appendChild(b("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), S.remove(), o.appendChild(r), r;
+  }, M = () => {
+    !c || c.text || (c.node.classList.add("nebo-chat__msg--waiting"), c.node.textContent = e.name ? `${e.name} is waiting for your OK in Nebo.` : "Waiting for your OK in Nebo.");
+  }, f = (r) => {
+    h = r, l.textContent = r ? "Stop" : "Send", l.classList.toggle("nebo-chat__button--stop", r), l.disabled = !r && !i.value.trim(), r && !c && (c = { node: X(), text: "" }, k(!0)), r || (c && !c.text && c.node.remove(), c = null, A());
+  }, L = () => {
+    i.style.height = "auto", i.style.height = `${Math.min(i.scrollHeight, 160)}px`, h || (l.disabled = !i.value.trim());
+  }, F = async () => {
+    f(!1), o.textContent = "";
     try {
-      const r = await $.history({ thread: n });
-      for (const v of r.messages) w(v.role, v.content);
-      P(), m(r.running), x(!0);
+      const r = await E.history({ thread: n });
+      for (const g of r.messages) _(g.role, g.content);
+      A(), f(r.running), r.running && r.waiting && M(), k(!0);
     } catch {
-      w("error", "Could not load the conversation. Try again.");
+      _("error", "Could not load the conversation. Try again.");
     }
-  }, Y = $.onMessage((r) => {
-    r.thread === n && (r.type === "message" ? h || (w("user", r.message.content), m(!0)) : r.type === "stream" ? (i || m(!0), i && (i.text += r.text, i.node.textContent = "", z(i.node, i.text), x())) : r.type === "error" ? (m(!1), w("error", r.error), x()) : (m(!1), r.type === "complete" && r.notice && w("note", r.notice)));
-  }), M = async () => {
+  }, Z = E.onMessage((r) => {
+    if (r.type === "reconnected") {
+      F();
+      return;
+    }
+    r.thread === n && (r.type === "waiting" ? (c || f(!0), M()) : r.type === "message" ? h || (_("user", r.message.content), f(!0)) : r.type === "stream" ? (c || f(!0), c && (c.text += r.text, c.node.classList.remove("nebo-chat__msg--waiting"), c.node.textContent = "", Y(c.node, c.text), k())) : r.type === "error" ? (f(!1), _("error", r.error), k()) : (f(!1), r.type === "complete" && r.notice && _("note", r.notice)));
+  }), z = async () => {
     if (h) {
       try {
-        await $.stop({ thread: n });
+        await E.stop({ thread: n });
       } catch {
       }
       return;
     }
-    const r = c.value.trim();
+    const r = i.value.trim();
     if (r) {
-      c.value = "", A(), w("user", r), m(!0);
+      i.value = "", L(), _("user", r), f(!0);
       try {
-        await $.send(r, { thread: n, scope: e.scope });
-      } catch {
-        m(!1), w("error", "Could not send. Try again.");
+        await E.send(r, { thread: n, scope: e.scope });
+      } catch (g) {
+        f(!1), _("error", g instanceof V && g.status === 409 ? g.message : "Could not send. Try again.");
       }
     }
   };
   return d.addEventListener("submit", (r) => {
-    r.preventDefault(), M();
-  }), c.addEventListener("input", A), c.addEventListener("keydown", (r) => {
-    r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), M());
-  }), m(!1), K(), {
+    r.preventDefault(), z();
+  }), i.addEventListener("input", L), i.addEventListener("keydown", (r) => {
+    r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), z());
+  }), f(!1), F(), {
+    thread: n,
     reset() {
-      o.textContent = "", m(!1);
+      o.textContent = "", f(!1);
     },
     destroy() {
-      Y(), s.remove();
+      Z(), s.remove();
     }
   };
 }
-class fe {
+class ye {
   constructor() {
-    this.fetch = X, this.WebSocket = T, this.storage = te, this.agents = ne, this.janus = ae, this.decide = se, this.share = re, this.files = oe, this.surfaces = I, this.a2ui = j, this.identity = de, this.chat = $, I._a2uiHandler = (e) => j._handleMessage(e), j._setSendFn((e) => I._rawSend(e));
+    this.fetch = ne, this.WebSocket = N, this.storage = re, this.agents = oe, this.janus = ce, this.decide = ie, this.share = de, this.files = le, this.surfaces = U, this.a2ui = J, this.identity = pe, this.chat = E, U._a2uiHandler = (e) => J._handleMessage(e), J._setSendFn((e) => U._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
    */
   configure(e) {
-    e.appId && Q(e.appId), e.baseUrl && V(e.baseUrl);
+    e.appId && ee(e.appId), e.baseUrl && te(e.baseUrl);
   }
 }
-const me = new fe();
+const we = new ye();
 export {
-  ie as NeboA2UI,
-  fe as NeboSDK,
-  ce as NeboSurfaces,
-  T as NeboWebSocket,
-  j as a2ui,
-  ne as agents,
-  $ as chat,
-  se as decide,
-  oe as files,
+  V as ChatError,
+  ue as NeboA2UI,
+  ye as NeboSDK,
+  he as NeboSurfaces,
+  N as NeboWebSocket,
+  J as a2ui,
+  oe as agents,
+  E as chat,
+  ie as decide,
+  le as files,
   p as getAppId,
-  f as getBaseUrl,
-  de as identity,
-  ae as janus,
-  me as nebo,
-  X as neboFetch,
-  Q as setAppId,
-  V as setBaseUrl,
-  re as share,
-  te as storage,
-  I as surfaces
+  m as getBaseUrl,
+  pe as identity,
+  ce as janus,
+  we as nebo,
+  ne as neboFetch,
+  ee as setAppId,
+  te as setBaseUrl,
+  de as share,
+  re as storage,
+  U as surfaces
 };

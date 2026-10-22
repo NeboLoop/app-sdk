@@ -14,18 +14,19 @@
 import { getAppId, getBaseUrl } from './config';
 
 export const files = {
-  /** `files.url('Media/Projects/reel/render.mp4')` */
+  /**
+   * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
+   * part names nothing inside a granted folder and is refused here.
+   */
   url(path: string): string {
-    const appId = getAppId();
-    const rel = path
-      .split('/')
-      .filter((part) => part !== '')
-      .map(encodeURIComponent)
-      .join('/');
-    const route = `/api/v1/apps/${appId}/files/${rel}`;
-    // The desktop window's own scheme carries the request to Nebo; a media
-    // element's address is never rewritten the way fetch() is.
-    if (window.location.protocol === 'neboapp:') return `neboapp://${appId}${route}`;
-    return `${getBaseUrl()}${route}`;
+    const parts = path.split('/').filter((part) => part !== '');
+    if (parts.some((part) => part === '.' || part === '..')) {
+      throw new Error(`[nebo-sdk] files.url: "${path}" climbs out of its folder; name the file inside the granted folder`);
+    }
+    const appId = encodeURIComponent(getAppId());
+    const rel = parts.map(encodeURIComponent).join('/');
+    // The page's base carries its pass: a media element's address goes to
+    // Nebo directly and streams, on the desktop as in a browser.
+    return `${getBaseUrl()}/api/v1/apps/${appId}/files/${rel}`;
   }
 };

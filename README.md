@@ -190,14 +190,22 @@ const project = await fetch(nebo.files.url('Media/Projects/reel/project.json')).
 ```
 
 - The address works wherever the page is open: the desktop window, a
-  browser, the mobile app. Never build an `/api/v1/...` address yourself.
+  browser, the mobile app. It carries the page's own pass, so never build an
+  `/api/v1/...` address yourself.
 - Read only. Files stream with byte ranges, so a video plays and seeks.
-- A path outside every granted folder is refused (403). A file that is
-  missing, hidden (a part below the granted folder starting with `.`, such as
-  `.proxies` or `.env`), or reached through a link out of the folder is not
-  found (404). To read a hidden folder, grant it by name:
-  `filesystem:read:Media/Projects/reel/.proxies`.
-- A grant is a folder inside `~/NeboAI`, relative to it, with no `..`.
+- A path with a `.` or `..` part throws. A path outside every granted folder
+  is refused (403). A file that is missing, hidden (any part starting with
+  `.`, such as `.proxies` or `.env`), in a coding agent's folder, or reached
+  through a link out of the folder is not found (404). Hidden folders are
+  never served, so keep what the page shows in visible folders.
+- A grant is a folder inside `~/NeboAI`, relative to it: no leading `/`, no
+  `..`, no hidden part.
+- Who decides: an app the owner's own employees build on his Nebo gets its
+  grants as written. An app installed from the marketplace or shared through
+  a loop gets none until the owner allows it. Nebo asks him in plain words
+  ("Media Studio wants to see the files in NeboAI › Media › Projects"), he
+  can take it back in the app's settings, and Nebo asks again when an update
+  adds a permission. Until then the route answers 403.
 
 ### `nebo.chat`
 - `mount(element, options?)`: Embed chat UI
@@ -234,6 +242,28 @@ Call `nebo.surfaces.connect()` so cards arrive. Cards reach only the app they we
 
 ### `nebo.configure(options)`
 Set `appId` and `baseUrl` manually (auto-detected by default).
+
+## Where the page runs
+
+An app's page is confined to its own app:
+
+- It runs in an origin of its own. In a browser and in the mobile app Nebo
+  serves it in a sandbox (a Content-Security-Policy `sandbox` without
+  `allow-same-origin`), so it shares no cookies, storage or origin with
+  Nebo's own page or the neboai.com console. On the desktop it is its own
+  `neboapp://<id>` window.
+- It proves itself with its own pass, which Nebo puts in the page's address
+  (`/k/<pass>/apps/<id>/ui/…`) and its base URL. The pass reaches the app's
+  own routes (`/api/v1/apps/<id>/…`, its socket) and nothing else: not the
+  owner's files, agents or settings, and no other app's data. Every SDK call
+  carries it through `getBaseUrl()`; relative addresses carry it too.
+- `localStorage` keeps working: in the sandbox Nebo keeps it in the app's own
+  storage, under the key `localStorage`. `sessionStorage` lasts as long as
+  the page. Prefer `nebo.storage`, which the app's employee can read too.
+- `nebo.fetch` to another site needs `network:<domain>`, and invoking another
+  employee needs `subagent:<id>`. An app the owner's employees build on his
+  Nebo gets what its manifest asks for. One installed from the marketplace
+  or shared through a loop gets nothing until the owner allows it.
 
 ## What the page gets from Nebo (no SDK call needed)
 

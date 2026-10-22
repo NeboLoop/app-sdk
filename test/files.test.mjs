@@ -25,10 +25,33 @@ async function urlOn(href, meta, path) {
   return fresh.nebo.files.url(path);
 }
 
-test('the desktop window gets its own scheme', async () => {
+test('the desktop window goes to Nebo with its pass', async () => {
+  const desktop = { 'nebo-app-id': 'app-1', 'nebo-base-url': 'http://127.0.0.1:27895/k/av9' };
   assert.equal(
-    await urlOn('neboapp://app-1/index.html', {}, 'Media/Projects/reel/render.mp4'),
-    'neboapp://app-1/api/v1/apps/app-1/files/Media/Projects/reel/render.mp4'
+    await urlOn('neboapp://app-1/index.html', desktop, 'Media/Projects/reel/render.mp4'),
+    'http://127.0.0.1:27895/k/av9/api/v1/apps/app-1/files/Media/Projects/reel/render.mp4'
+  );
+});
+
+test('a path that climbs out of its folder is refused', async () => {
+  for (const bad of ['Media/../secret.txt', '../x', 'Media/./x', '..']) {
+    page('http://localhost:27895/apps/app-1/ui/index.html');
+    const fresh = await import(`../dist/index.js?${Math.random()}`);
+    assert.throws(() => fresh.nebo.files.url(bad), /climbs out/, bad);
+  }
+});
+
+test('the app id is encoded', async () => {
+  assert.equal(
+    await urlOn('http://localhost:27895/apps/a%2Fb/ui/index.html', {}, 'x.png'),
+    'http://localhost:27895/api/v1/apps/a%2Fb/files/x.png'
+  );
+});
+
+test('the page under its pass finds its app and base', async () => {
+  assert.equal(
+    await urlOn('https://neboai.com/t/bot-9/k/av1/apps/app-1/ui/index.html', { 'nebo-base-url': 'https://neboai.com/t/bot-9/k/av1' }, 'x.png'),
+    'https://neboai.com/t/bot-9/k/av1/api/v1/apps/app-1/files/x.png'
   );
 });
 

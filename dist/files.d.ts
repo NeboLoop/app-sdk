@@ -11,6 +11,9 @@
  * itself.
  */
 export declare const files: {
-    /** `files.url('Media/Projects/reel/render.mp4')` */
+    /**
+     * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
+     * part names nothing inside a granted folder and is refused here.
+     */
     url(path: string): string;
 };

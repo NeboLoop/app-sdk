@@ -1,73 +1,73 @@
-let h = null, l = null;
-function i() {
-  if (h) return h;
+let b = null, y = null;
+function p() {
+  if (b) return b;
   if (window.location.protocol === "neboapp:")
-    return h = window.location.hostname, h;
+    return b = window.location.hostname, b;
   const t = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
   if (t)
-    return h = decodeURIComponent(t[1]), h;
+    return b = decodeURIComponent(t[1]), b;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return h = e.getAttribute("content") || "", h;
+    return b = e.getAttribute("content") || "", b;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function d() {
-  if (l) return l;
+function f() {
+  if (y) return y;
   const t = document.querySelector('meta[name="nebo-base-url"]');
-  return t ? (l = t.getAttribute("content") || "", l) : window.location.protocol === "neboapp:" ? (l = "http://localhost:27895", l) : (l = window.location.origin, l);
+  return t ? (y = t.getAttribute("content") || "", y) : window.location.protocol === "neboapp:" ? (y = "http://localhost:27895", y) : (y = window.location.origin, y);
 }
-function k(t) {
-  h = t;
+function Q(t) {
+  b = t;
 }
-function x(t) {
-  l = t;
+function V(t) {
+  y = t;
 }
-async function C(t, e) {
-  const s = i(), a = d();
+async function X(t, e) {
+  const n = p(), a = f();
   if (t.startsWith("http://") || t.startsWith("https://")) {
-    const f = `${a}/api/v1/apps/${s}/http/proxy`, r = {};
-    e != null && e.headers && new Headers(e.headers).forEach((E, j) => {
-      r[j] = E;
+    const d = `${a}/api/v1/apps/${n}/http/proxy`, c = {};
+    e != null && e.headers && new Headers(e.headers).forEach((E, x) => {
+      c[x] = E;
     });
-    const p = {
+    const l = {
       url: t,
       method: (e == null ? void 0 : e.method) || "GET",
-      headers: r,
+      headers: c,
       body: e != null && e.body ? String(e.body) : void 0
-    }, u = await (await fetch(f, {
+    }, i = await (await fetch(d, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(p)
+      body: JSON.stringify(l)
     })).json();
-    return new Response(u.body, {
-      status: u.status,
-      headers: u.headers
+    return new Response(i.body, {
+      status: i.status,
+      headers: i.headers
     });
   }
-  const n = t.startsWith("/") ? t : `/${t}`, c = `${a}/api/v1/apps/${s}/api${n}`;
-  return fetch(c, e);
+  const s = t.startsWith("/") ? t : `/${t}`, o = `${a}/api/v1/apps/${n}/api${s}`;
+  return fetch(o, e);
 }
-class I {
+class T {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const s = i(), n = d().replace(/^http/, "ws");
-    this.url = `${n}/ws/app/${s}`, this.connect();
+    const n = p(), s = f().replace(/^http/, "ws");
+    this.url = `${s}/ws/app/${n}`, this.connect();
   }
   connect() {
     this._closed || (this.ws = new WebSocket(this.url), this.ws.onopen = (e) => {
-      var s;
-      this.reconnectDelay = 1e3, (s = this.onopen) == null || s.call(this, e);
+      var n;
+      this.reconnectDelay = 1e3, (n = this.onopen) == null || n.call(this, e);
     }, this.ws.onmessage = (e) => {
-      var s;
-      return (s = this.onmessage) == null ? void 0 : s.call(this, e);
+      var n;
+      return (n = this.onmessage) == null ? void 0 : n.call(this, e);
     }, this.ws.onerror = (e) => {
-      var s;
-      return (s = this.onerror) == null ? void 0 : s.call(this, e);
+      var n;
+      return (n = this.onerror) == null ? void 0 : n.call(this, e);
     }, this.ws.onclose = (e) => {
-      var s;
-      (s = this.onclose) == null || s.call(this, e), this._closed || this.scheduleReconnect();
+      var n;
+      (n = this.onclose) == null || n.call(this, e), this._closed || this.scheduleReconnect();
     });
   }
   scheduleReconnect() {
@@ -80,28 +80,28 @@ class I {
     return ((e = this.ws) == null ? void 0 : e.readyState) ?? WebSocket.CLOSED;
   }
   send(e) {
-    var s;
-    (s = this.ws) == null || s.send(e);
+    var n;
+    (n = this.ws) == null || n.send(e);
   }
-  close(e, s) {
+  close(e, n) {
     var a;
-    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, s);
+    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, n);
   }
 }
-const T = /* @__PURE__ */ new Set();
-let $ = null;
-function D() {
-  $ || ($ = new I(), $.onmessage = (t) => {
+const J = /* @__PURE__ */ new Set();
+let N = null;
+function Z() {
+  N || (N = new T(), N.onmessage = (t) => {
     let e;
     try {
       e = JSON.parse(t.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== i() || T.forEach((s) => s(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== p() || J.forEach((n) => n(e.data));
   });
 }
-function J(t) {
+function ee(t) {
   if (typeof t != "string") return t;
   let e;
   try {
@@ -116,52 +116,52 @@ function J(t) {
     return e;
   }
 }
-function b(t) {
-  const e = i(), s = d();
-  return t ? `${s}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${s}/api/v1/apps/${e}/storage`;
+function C(t) {
+  const e = p(), n = f();
+  return t ? `${n}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${n}/api/v1/apps/${e}/storage`;
 }
-const U = {
+const te = {
   async getItem(t) {
-    const e = await fetch(b(t));
+    const e = await fetch(C(t));
     if (e.status === 404) return null;
-    const s = await e.json();
-    return J(s.value);
+    const n = await e.json();
+    return ee(n.value);
   },
   async setItem(t, e) {
-    const s = typeof e == "string" ? e : JSON.stringify(e);
-    await fetch(b(t), {
+    const n = typeof e == "string" ? e : JSON.stringify(e);
+    await fetch(C(t), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: s })
+      body: JSON.stringify({ value: n })
     });
   },
   async removeItem(t) {
-    await fetch(b(t), { method: "DELETE" });
+    await fetch(C(t), { method: "DELETE" });
   },
   async clear() {
     const t = await this.keys();
     await Promise.all(t.map((e) => this.removeItem(e)));
   },
   async keys() {
-    return ((await (await fetch(b())).json()).items || []).map((s) => s[0]);
+    return ((await (await fetch(C())).json()).items || []).map((n) => n[0]);
   },
   /**
    * Call `handler` after every change to the store: the employee's writes
    * and other open views'. Returns a function that stops listening.
    */
   onChange(t) {
-    return T.add(t), D(), () => {
-      T.delete(t);
+    return J.add(t), Z(), () => {
+      J.delete(t);
     };
   }
 };
-function v(t) {
-  const e = i();
-  return `${d()}/api/v1/apps/${e}/agents/${t}`;
+function W(t) {
+  const e = p();
+  return `${f()}/api/v1/apps/${e}/agents/${t}`;
 }
-const P = {
+const ne = {
   async invoke(t, e) {
-    return (await fetch(v("invoke"), {
+    return (await fetch(W("invoke"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -172,7 +172,7 @@ const P = {
     })).json();
   },
   async *stream(t, e) {
-    const s = await fetch(v("stream"), {
+    const n = await fetch(W("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -181,107 +181,107 @@ const P = {
         data: e == null ? void 0 : e.data
       })
     });
-    if (!s.body)
+    if (!n.body)
       throw new Error("No response body for streaming");
-    const a = s.body.getReader(), n = new TextDecoder();
-    let c = "";
+    const a = n.body.getReader(), s = new TextDecoder();
+    let o = "";
     for (; ; ) {
-      const { done: f, value: r } = await a.read();
-      if (f) break;
-      c += n.decode(r, { stream: !0 });
-      const p = c.split(`
+      const { done: d, value: c } = await a.read();
+      if (d) break;
+      o += s.decode(c, { stream: !0 });
+      const l = o.split(`
 `);
-      c = p.pop() || "";
-      for (const y of p)
-        if (y.startsWith("data: ")) {
-          const u = y.slice(6);
-          if (u === "[DONE]") return;
+      o = l.pop() || "";
+      for (const h of l)
+        if (h.startsWith("data: ")) {
+          const i = h.slice(6);
+          if (i === "[DONE]") return;
           try {
-            yield JSON.parse(u);
+            yield JSON.parse(i);
           } catch {
-            yield { text: u, done: !1 };
+            yield { text: i, done: !1 };
           }
         }
     }
   }
 };
-function N(t) {
-  const e = i();
-  return `${d()}/api/v1/apps/${e}/janus/${t}`;
+function F(t) {
+  const e = p();
+  return `${f()}/api/v1/apps/${e}/janus/${t}`;
 }
-const W = {
+const ae = {
   async complete(t) {
-    const s = await (await fetch(N("complete"), {
+    const n = await (await fetch(F("complete"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(t)
     })).json();
-    return s.text || s.content || "";
+    return n.text || n.content || "";
   },
   async *stream(t) {
-    const e = await fetch(N("stream"), {
+    const e = await fetch(F("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(t)
     });
     if (!e.body)
       throw new Error("No response body for streaming");
-    const s = e.body.getReader(), a = new TextDecoder();
-    let n = "";
+    const n = e.body.getReader(), a = new TextDecoder();
+    let s = "";
     for (; ; ) {
-      const { done: c, value: f } = await s.read();
-      if (c) break;
-      n += a.decode(f, { stream: !0 });
-      const r = n.split(`
+      const { done: o, value: d } = await n.read();
+      if (o) break;
+      s += a.decode(d, { stream: !0 });
+      const c = s.split(`
 `);
-      n = r.pop() || "";
-      for (const p of r)
-        if (p.startsWith("data: ")) {
-          const y = p.slice(6);
-          if (y === "[DONE]") return;
+      s = c.pop() || "";
+      for (const l of c)
+        if (l.startsWith("data: ")) {
+          const h = l.slice(6);
+          if (h === "[DONE]") return;
           try {
-            yield JSON.parse(y).text;
+            yield JSON.parse(h).text;
           } catch {
-            yield y;
+            yield h;
           }
         }
     }
   }
 };
-async function R(t) {
-  const e = await fetch(`${d()}/api/v1/apps/${i()}/janus/decide`, {
+async function se(t) {
+  const e = await fetch(`${f()}/api/v1/apps/${p()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(t)
-  }), s = await e.json().catch(() => ({}));
+  }), n = await e.json().catch(() => ({}));
   if (!e.ok)
-    throw new Error(s.error || `decide failed (${e.status})`);
-  return s;
+    throw new Error(n.error || `decide failed (${e.status})`);
+  return n;
 }
-async function F(t) {
-  const e = new URLSearchParams(window.location.search), s = e.get("thread") || "", a = e.get("client") || "", n = await fetch(`${d()}/api/v1/apps/${i()}/share`, {
+async function re(t) {
+  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${f()}/api/v1/apps/${p()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: t.name, content: t.content, thread: s, client: a })
-  }), c = await n.json().catch(() => ({}));
-  if (!n.ok)
-    throw new Error(c.error || `share failed (${n.status})`);
-  return c;
+    body: JSON.stringify({ name: t.name, content: t.content, thread: n, client: a })
+  }), o = await s.json().catch(() => ({}));
+  if (!s.ok)
+    throw new Error(o.error || `share failed (${s.status})`);
+  return o;
 }
-const M = {
+const oe = {
   /**
    * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
    * part names nothing inside a granted folder and is refused here.
    */
   url(t) {
-    const e = t.split("/").filter((n) => n !== "");
-    if (e.some((n) => n === "." || n === ".."))
+    const e = t.split("/").filter((s) => s !== "");
+    if (e.some((s) => s === "." || s === ".."))
       throw new Error(`[nebo-sdk] files.url: "${t}" climbs out of its folder; name the file inside the granted folder`);
-    const s = encodeURIComponent(i()), a = e.map(encodeURIComponent).join("/");
-    return `${d()}/api/v1/apps/${s}/files/${a}`;
+    const n = encodeURIComponent(p()), a = e.map(encodeURIComponent).join("/");
+    return `${f()}/api/v1/apps/${n}/files/${a}`;
   }
 };
-class A {
+class ce {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -291,17 +291,17 @@ class A {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new I(), this.ws.onopen = () => {
+    this.ws || (this.ws = new T(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
-      var s, a;
+      var n, a;
       try {
-        const n = JSON.parse(e.data);
-        if (n.type === "a2ui_message" && ((s = n.data) != null && s.message)) {
-          (a = this._a2uiHandler) == null || a.call(this, n.data.message);
+        const s = JSON.parse(e.data);
+        if (s.type === "a2ui_message" && ((n = s.data) != null && n.message)) {
+          (a = this._a2uiHandler) == null || a.call(this, s.data.message);
           return;
         }
-        this.handleEvent(n);
+        this.handleEvent(s);
       } catch {
       }
     }, this.ws.onclose = () => {
@@ -315,20 +315,20 @@ class A {
     this.ws && (this.ws.close(), this.ws = null), this._connected = !1;
   }
   /** Subscribe to a specific event type (or '*' for all) */
-  on(e, s) {
-    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(s), () => {
+  on(e, n) {
+    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(n), () => {
       var a;
-      (a = this.listeners.get(e)) == null || a.delete(s);
+      (a = this.listeners.get(e)) == null || a.delete(n);
     };
   }
   /** Remove a specific listener */
-  off(e, s) {
+  off(e, n) {
     var a;
-    (a = this.listeners.get(e)) == null || a.delete(s);
+    (a = this.listeners.get(e)) == null || a.delete(n);
   }
   /** Send an action/event to the agent */
-  send(e, s) {
-    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...s }));
+  send(e, n) {
+    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...n }));
   }
   /** Request a state snapshot from the agent */
   requestState() {
@@ -341,50 +341,50 @@ class A {
   // ─── Internal ────────────────────────────────────────────────────
   handleEvent(e) {
     e.type === "state_snapshot" ? this.state = { ...e.snapshot } : e.type === "state_delta" && this.applyDelta(e.delta);
-    const s = this.listeners.get(e.type);
-    if (s)
-      for (const n of s)
+    const n = this.listeners.get(e.type);
+    if (n)
+      for (const s of n)
         try {
-          n(e);
+          s(e);
         } catch {
         }
     const a = this.listeners.get("*");
     if (a)
-      for (const n of a)
+      for (const s of a)
         try {
-          n(e);
+          s(e);
         } catch {
         }
   }
   applyDelta(e) {
-    for (const s of e) {
-      const a = s.path.split("/").filter(Boolean);
+    for (const n of e) {
+      const a = n.path.split("/").filter(Boolean);
       if (a.length === 0) continue;
-      const n = this.resolveParent(a);
-      if (!n) continue;
-      const c = a[a.length - 1];
-      switch (s.op) {
+      const s = this.resolveParent(a);
+      if (!s) continue;
+      const o = a[a.length - 1];
+      switch (n.op) {
         case "add":
         case "replace":
-          n[c] = s.value;
+          s[o] = n.value;
           break;
         case "remove":
-          delete n[c];
+          delete s[o];
           break;
       }
     }
   }
   resolveParent(e) {
-    let s = this.state;
+    let n = this.state;
     for (let a = 0; a < e.length - 1; a++) {
-      if (s == null || typeof s != "object") return null;
-      s = s[e[a]];
+      if (n == null || typeof n != "object") return null;
+      n = n[e[a]];
     }
-    return s;
+    return n;
   }
 }
-const _ = new A();
-class L {
+const I = new ce();
+class ie {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -406,8 +406,8 @@ class L {
     if (this.processor)
       try {
         this.processor.processMessages([e]);
-      } catch (s) {
-        console.error("[nebo-sdk] A2UI processing error:", s);
+      } catch (n) {
+        console.error("[nebo-sdk] A2UI processing error:", n);
       }
   }
   /**
@@ -419,7 +419,7 @@ class L {
   /**
    * Send a v0.9 client action back to the agent.
    */
-  sendAction(e, s) {
+  sendAction(e, n) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
@@ -429,7 +429,7 @@ class L {
           action: {
             surfaceId: e,
             timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-            ...s
+            ...n
           }
         }
       }
@@ -438,117 +438,292 @@ class L {
   /**
    * Send a v0.9 client error report back to the agent.
    */
-  sendError(e, s, a, n) {
+  sendError(e, n, a, s) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
         surface_id: e,
         message: {
           version: "v0.9",
-          error: { code: s, surfaceId: e, message: a, path: n }
+          error: { code: n, surfaceId: e, message: a, path: s }
         }
       }
     }));
   }
 }
-const O = new L();
-let w = null;
-const H = {
+const j = new ie();
+let S = null;
+const de = {
   async get() {
-    if (w) return w;
-    const t = i(), e = d(), s = await fetch(`${e}/api/v1/apps/${t}/identity`);
-    if (!s.ok)
-      throw new Error(`[nebo-sdk] identity fetch failed: ${s.status}`);
-    return w = await s.json(), w;
+    if (S) return S;
+    const t = p(), e = f(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
+    if (!n.ok)
+      throw new Error(`[nebo-sdk] identity fetch failed: ${n.status}`);
+    return S = await n.json(), S;
   },
   invalidate() {
-    w = null;
+    S = null;
   }
-};
-let o = null, S = null, g = [], m = null;
-function q(t) {
-  if (!(!t.data || typeof t.data.type != "string") && t.data.type.startsWith("nebo:")) {
-    t.data.type === "nebo:resize" && o && t.data.height && (o.style.height = `${t.data.height}px`);
-    for (const e of g)
-      e(t.data);
-  }
+}, R = /* @__PURE__ */ new Set();
+let D = null, H = null;
+function B(t = "") {
+  return `${f()}/api/v1/apps/${encodeURIComponent(p())}/chat${t}`;
 }
-const B = {
+function le(t) {
+  if (typeof t != "string") return null;
+  const e = `agent:${p()}:app`;
+  if (t !== e)
+    return t.startsWith(e + ":") ? t.slice(e.length + 1) : null;
+}
+function k(t) {
+  R.forEach((e) => e(t));
+}
+function L() {
+  D || (D = new T(), D.onmessage = (t) => {
+    let e;
+    try {
+      e = JSON.parse(t.data);
+    } catch {
+      return;
+    }
+    const n = e.data ?? {}, a = le(n.session_id);
+    if (a !== null)
+      switch (e.type) {
+        case "chat_user_message":
+          k({
+            type: "message",
+            thread: a,
+            message: {
+              id: String(n.id ?? ""),
+              role: "user",
+              content: String(n.content ?? ""),
+              createdAt: Number(n.createdAt ?? Date.now())
+            }
+          });
+          break;
+        case "chat_stream":
+          typeof n.content == "string" && n.content && k({ type: "stream", thread: a, text: n.content });
+          break;
+        case "chat_complete":
+          if (n.stop_reason === "queued_into_running_turn") break;
+          k({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
+          break;
+        case "chat_error":
+          k({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
+          break;
+        case "chat_cancelled":
+          k({ type: "stopped", thread: a });
+          break;
+      }
+  });
+}
+async function U(t, e) {
+  const n = await fetch(B(t), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(e)
+  });
+  if (!n.ok) throw new Error(await n.text() || `chat: ${n.status}`);
+  return n;
+}
+const $ = {
+  /** The conversation so far, oldest first (the last 50, or `limit`). */
+  async history(t) {
+    const e = new URLSearchParams();
+    t != null && t.thread && e.set("thread", t.thread), t != null && t.before && e.set("before", t.before), t != null && t.limit && e.set("limit", String(t.limit));
+    const n = e.toString(), a = await fetch(B(n ? `?${n}` : ""));
+    if (!a.ok) throw new Error(await a.text() || `chat: ${a.status}`);
+    const s = await a.json();
+    return { messages: s.messages ?? [], running: !!s.running, hasMore: !!s.hasMore };
+  },
+  /** Say something to the employee. The reply arrives through `onMessage`. */
+  async send(t, e) {
+    L(), await U("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: H });
+  },
+  /** Stop the turn running in the conversation. */
+  async stop(t) {
+    await U("/stop", { thread: t == null ? void 0 : t.thread });
+  },
+  /** Start the conversation over; the one before stays with the owner. */
+  async newThread(t) {
+    await U("/new", { thread: t == null ? void 0 : t.thread }), u == null || u.reset();
+  },
+  /** Hear the conversation live: words sent (from any open view), the
+   *  reply as it streams, and how each turn ends. Returns an unsubscribe. */
+  onMessage(t) {
+    return L(), R.add(t), () => R.delete(t);
+  },
+  /** What is on the page, sent beside every message. `null` clears it. */
+  setContext(t) {
+    H = t;
+  },
+  /** A ready chat with the employee, drawn inside `element`. */
   mount(t, e) {
-    o && this.unmount();
-    const s = i(), a = d(), n = new URLSearchParams();
-    e != null && e.placeholder && n.set("placeholder", e.placeholder), e != null && e.theme && n.set("theme", e.theme), e != null && e.borderless && n.set("borderless", "1"), e != null && e.contextId && n.set("ctx", e.contextId), e != null && e.scope && n.set("scope", e.scope);
-    const c = n.toString(), f = `${a}/chat-embed/${s}${c ? "?" + c : ""}`, r = document.createElement("iframe");
-    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), t.appendChild(r), o = r, S = t, m = q, window.addEventListener("message", m);
+    u == null || u.destroy(), u = ue(t, e ?? {});
   },
   unmount() {
-    o && S && S.removeChild(o), m && (window.removeEventListener("message", m), m = null), o = null, S = null, g = [];
-  },
-  send(t) {
-    var e;
-    (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
-      { type: "nebo:send", message: t },
-      "*"
-    );
-  },
-  onMessage(t) {
-    return g.push(t), () => {
-      g = g.filter((e) => e !== t);
-    };
-  },
-  /**
-   * Set app context that gets injected into every agent request from the chat.
-   * The agent sees this as invisible context — not rendered in the chat UI.
-   *
-   * Call this whenever the user navigates or the displayed data changes.
-   * Pass null to clear context.
-   */
-  setContext(t) {
-    var e;
-    (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
-      { type: "nebo:set-context", context: t },
-      "*"
-    );
-  },
-  newThread() {
-    var t;
-    (t = o == null ? void 0 : o.contentWindow) == null || t.postMessage(
-      { type: "nebo:new-thread" },
-      "*"
-    );
+    u == null || u.destroy(), u = null;
   }
 };
-class z {
+let u = null;
+const q = "nebo-chat-style", he = `
+.nebo-chat{--nc-bg:#fff;--nc-fg:#16181d;--nc-muted:#6b7280;--nc-line:#e5e7eb;--nc-me:#16181d;--nc-me-fg:#fff;--nc-them:#f3f4f6;--nc-accent:#4f46e5;
+  display:flex;flex-direction:column;height:100%;min-height:0;background:var(--nc-bg);color:var(--nc-fg);
+  font:16px/1.6 "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--nc-line);border-radius:12px;overflow:hidden;box-sizing:border-box}
+.nebo-chat *{box-sizing:border-box}
+.nebo-chat.nebo-chat--borderless{border:0;border-radius:0}
+.nebo-chat.nebo-chat--dark{--nc-bg:#111318;--nc-fg:#eceef2;--nc-muted:#9aa1ad;--nc-line:#262a33;--nc-me:#eceef2;--nc-me-fg:#111318;--nc-them:#1c1f26;--nc-accent:#8b8cf8}
+@media (prefers-color-scheme:dark){.nebo-chat.nebo-chat--auto{--nc-bg:#111318;--nc-fg:#eceef2;--nc-muted:#9aa1ad;--nc-line:#262a33;--nc-me:#eceef2;--nc-me-fg:#111318;--nc-them:#1c1f26;--nc-accent:#8b8cf8}}
+.nebo-chat__log{flex:1;min-height:0;overflow-y:auto;padding:20px 16px;display:flex;flex-direction:column;gap:12px}
+.nebo-chat__empty{margin:auto;color:var(--nc-muted);text-align:center;font-size:15px}
+.nebo-chat__msg{max-width:85%;padding:10px 14px;border-radius:18px;white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere}
+.nebo-chat__msg--user{align-self:flex-end;background:var(--nc-me);color:var(--nc-me-fg);border-bottom-right-radius:6px}
+.nebo-chat__msg--assistant{align-self:flex-start;background:var(--nc-them);border-bottom-left-radius:6px}
+.nebo-chat__msg--error{align-self:center;background:transparent;color:#dc2626;font-size:14px;padding:4px 8px}
+.nebo-chat__msg--note{align-self:center;background:transparent;color:var(--nc-muted);font-size:14px;padding:4px 8px}
+.nebo-chat__msg code{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;background:rgba(127,127,127,.15);padding:1px 5px;border-radius:5px}
+.nebo-chat__msg a{color:inherit;text-decoration:underline}
+.nebo-chat__dots{display:inline-flex;gap:4px;align-items:center;height:1.6em}
+.nebo-chat__dots i{width:6px;height:6px;border-radius:50%;background:var(--nc-muted);animation:nebo-chat-blink 1.2s infinite ease-in-out}
+.nebo-chat__dots i:nth-child(2){animation-delay:.2s}.nebo-chat__dots i:nth-child(3){animation-delay:.4s}
+@keyframes nebo-chat-blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.nebo-chat__composer{display:flex;gap:8px;align-items:flex-end;padding:12px;border-top:1px solid var(--nc-line)}
+.nebo-chat__input{flex:1;resize:none;border:1px solid var(--nc-line);border-radius:14px;padding:10px 14px;background:var(--nc-bg);color:var(--nc-fg);font:inherit;max-height:160px;outline:none}
+.nebo-chat__input:focus{border-color:var(--nc-accent)}
+.nebo-chat__button{flex:none;height:44px;min-width:44px;padding:0 16px;border:0;border-radius:22px;background:var(--nc-accent);color:#fff;font:600 15px/1 inherit;font-family:inherit;cursor:pointer}
+.nebo-chat__button:disabled{opacity:.4;cursor:default}
+.nebo-chat__button--stop{background:var(--nc-fg);color:var(--nc-bg)}
+`;
+function pe() {
+  if (document.getElementById(q)) return;
+  const t = document.createElement("style");
+  t.id = q, t.textContent = he, document.head.appendChild(t);
+}
+function g(t, e) {
+  const n = document.createElement(t);
+  return n.className = e, n;
+}
+function z(t, e) {
+  t.textContent = "";
+  const n = /(`[^`\n]+`|\*\*[^*\n]+\*\*|https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/g;
+  let a = 0;
+  for (const s of e.matchAll(n)) {
+    const o = s.index ?? 0;
+    o > a && t.appendChild(document.createTextNode(e.slice(a, o)));
+    const d = s[0];
+    if (d.startsWith("`"))
+      t.appendChild(document.createElement("code")).textContent = d.slice(1, -1);
+    else if (d.startsWith("**"))
+      t.appendChild(document.createElement("strong")).textContent = d.slice(2, -2);
+    else {
+      const c = t.appendChild(document.createElement("a"));
+      c.href = d, c.target = "_blank", c.rel = "noopener noreferrer", c.textContent = d;
+    }
+    a = o + d.length;
+  }
+  a < e.length && t.appendChild(document.createTextNode(e.slice(a)));
+}
+function ue(t, e) {
+  pe();
+  const n = e.contextId || void 0, a = e.theme ?? "auto", s = g("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
+  e.height && (s.style.height = e.height);
+  const o = g("div", "nebo-chat__log");
+  o.setAttribute("role", "log"), o.setAttribute("aria-live", "polite");
+  const d = g("form", "nebo-chat__composer"), c = g("textarea", "nebo-chat__input");
+  c.rows = 1, c.setAttribute("aria-label", "Message"), c.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
+  const l = g("button", "nebo-chat__button");
+  l.type = "submit", d.append(c, l), s.append(o, d), t.appendChild(s);
+  let h = !1, i = null;
+  const _ = g("div", "nebo-chat__empty");
+  _.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
+  const E = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, x = (r = !1) => {
+    (r || E()) && (o.scrollTop = o.scrollHeight);
+  }, P = () => {
+    o.querySelector(".nebo-chat__msg") ? _.remove() : o.appendChild(_);
+  }, w = (r, v) => {
+    _.remove();
+    const O = g("div", `nebo-chat__msg nebo-chat__msg--${r}`);
+    return z(O, v), o.appendChild(O), O;
+  }, G = () => {
+    const r = g("div", "nebo-chat__msg nebo-chat__msg--assistant");
+    return r.appendChild(g("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), _.remove(), o.appendChild(r), r;
+  }, m = (r) => {
+    h = r, l.textContent = r ? "Stop" : "Send", l.classList.toggle("nebo-chat__button--stop", r), l.disabled = !r && !c.value.trim(), r && !i && (i = { node: G(), text: "" }, x(!0)), r || (i && !i.text && i.node.remove(), i = null, P());
+  }, A = () => {
+    c.style.height = "auto", c.style.height = `${Math.min(c.scrollHeight, 160)}px`, h || (l.disabled = !c.value.trim());
+  }, K = async () => {
+    o.textContent = "";
+    try {
+      const r = await $.history({ thread: n });
+      for (const v of r.messages) w(v.role, v.content);
+      P(), m(r.running), x(!0);
+    } catch {
+      w("error", "Could not load the conversation. Try again.");
+    }
+  }, Y = $.onMessage((r) => {
+    r.thread === n && (r.type === "message" ? h || (w("user", r.message.content), m(!0)) : r.type === "stream" ? (i || m(!0), i && (i.text += r.text, i.node.textContent = "", z(i.node, i.text), x())) : r.type === "error" ? (m(!1), w("error", r.error), x()) : (m(!1), r.type === "complete" && r.notice && w("note", r.notice)));
+  }), M = async () => {
+    if (h) {
+      try {
+        await $.stop({ thread: n });
+      } catch {
+      }
+      return;
+    }
+    const r = c.value.trim();
+    if (r) {
+      c.value = "", A(), w("user", r), m(!0);
+      try {
+        await $.send(r, { thread: n, scope: e.scope });
+      } catch {
+        m(!1), w("error", "Could not send. Try again.");
+      }
+    }
+  };
+  return d.addEventListener("submit", (r) => {
+    r.preventDefault(), M();
+  }), c.addEventListener("input", A), c.addEventListener("keydown", (r) => {
+    r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), M());
+  }), m(!1), K(), {
+    reset() {
+      o.textContent = "", m(!1);
+    },
+    destroy() {
+      Y(), s.remove();
+    }
+  };
+}
+class fe {
   constructor() {
-    this.fetch = C, this.WebSocket = I, this.storage = U, this.agents = P, this.janus = W, this.decide = R, this.share = F, this.files = M, this.surfaces = _, this.a2ui = O, this.identity = H, this.chat = B, _._a2uiHandler = (e) => O._handleMessage(e), O._setSendFn((e) => _._rawSend(e));
+    this.fetch = X, this.WebSocket = T, this.storage = te, this.agents = ne, this.janus = ae, this.decide = se, this.share = re, this.files = oe, this.surfaces = I, this.a2ui = j, this.identity = de, this.chat = $, I._a2uiHandler = (e) => j._handleMessage(e), j._setSendFn((e) => I._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
    */
   configure(e) {
-    e.appId && k(e.appId), e.baseUrl && x(e.baseUrl);
+    e.appId && Q(e.appId), e.baseUrl && V(e.baseUrl);
   }
 }
-const K = new z();
+const me = new fe();
 export {
-  L as NeboA2UI,
-  z as NeboSDK,
-  A as NeboSurfaces,
-  I as NeboWebSocket,
-  O as a2ui,
-  P as agents,
-  B as chat,
-  R as decide,
-  M as files,
-  i as getAppId,
-  d as getBaseUrl,
-  H as identity,
-  W as janus,
-  K as nebo,
-  C as neboFetch,
-  k as setAppId,
-  x as setBaseUrl,
-  F as share,
-  U as storage,
-  _ as surfaces
+  ie as NeboA2UI,
+  fe as NeboSDK,
+  ce as NeboSurfaces,
+  T as NeboWebSocket,
+  j as a2ui,
+  ne as agents,
+  $ as chat,
+  se as decide,
+  oe as files,
+  p as getAppId,
+  f as getBaseUrl,
+  de as identity,
+  ae as janus,
+  me as nebo,
+  X as neboFetch,
+  Q as setAppId,
+  V as setBaseUrl,
+  re as share,
+  te as storage,
+  I as surfaces
 };

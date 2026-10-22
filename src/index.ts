@@ -13,7 +13,7 @@
  * - nebo.share → a file into the owner's Work, and Nebo's Share dialog on it
  * - nebo.files → the address of an owner's file in a folder the app is granted
  * - nebo.identity → agent context (name, persona, skills, inputs)
- * - nebo.chat → embedded full-featured chat UI via iframe
+ * - nebo.chat → the page's conversation with its own employee, and a ready chat UI
  */
 
 import { NeboSDK } from './sdk';
@@ -41,7 +41,7 @@ export type {
 } from './types';
 export type { AgentIdentity } from './identity';
 export type { ShareFile, Shared } from './share';
-export type { ChatOptions, ChatContext } from './chat';
+export type { ChatOptions, ChatContext, ChatMessage, ChatEvent, ChatHistory, SendOptions } from './chat';
 export type { A2UIMessageProcessor } from './a2ui';
 export type {
   SurfaceEvent, NeboSurfaceEvent, SurfaceEventMap,

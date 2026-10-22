@@ -48,7 +48,7 @@ const answer = await nebo.janus.complete({
 // Show the owner's own files (needs "filesystem:read:Media/Projects")
 video.src = nebo.files.url('Media/Projects/reel/render.mp4');
 
-// Embed chat panel
+// A chat with the app's employee, drawn in the page
 nebo.chat.mount(document.getElementById('chat'), {
   placeholder: 'Ask about your deals...',
   theme: 'dark',
@@ -208,12 +208,30 @@ const project = await fetch(nebo.files.url('Media/Projects/reel/project.json')).
   adds a permission. Until then the route answers 403.
 
 ### `nebo.chat`
-- `mount(element, options?)`: Embed chat UI
-- `unmount()`: Remove chat UI
-- `send(message)`: Programmatically send a message
-- `onMessage(handler)`: Listen for chat events
-- `setContext(context)`: Update app context for the agent
-- `newThread()`: Start a new conversation
+The page's conversation with its own employee. The page talks to that one
+employee only, with its own pass, wherever it is open (the desktop window, a
+browser, the mobile app). What it sends is the app's words, never the
+owner's: install codes, slash commands, file paths and @mentions of other
+employees are just words to the employee, and the employee works as it does
+for any app request (no shell). The owner reads the same conversation among
+the employee's chats in Nebo.
+
+- `mount(element, options?)`: a ready chat in `element`: the history, the
+  reply as it streams, Enter to send, Stop while it works. Options:
+  `placeholder`, `theme` (`auto` | `light` | `dark`), `height`, `borderless`,
+  `contextId` (a conversation of its own per document or record: letters,
+  digits, `-`, `_`, `.`), `scope` (a tool scope your agent.json declares),
+  `name` (what the chat calls the employee).
+- `unmount()`: remove it.
+- `history({thread?, before?, limit?})`: `{messages, running, hasMore}`, oldest first.
+- `send(message, {thread?, scope?})`: say something; the reply comes through `onMessage`.
+  Sent while a turn runs, the running turn takes it in.
+- `stop({thread?})`: stop the turn that is running.
+- `newThread({thread?})`: start over; the conversation before stays with the owner.
+- `onMessage(handler)`: `message` (words sent, from any open view), `stream`
+  (the reply as it comes), `complete` (with a `notice` when it stopped early),
+  `error`, `stopped`. Returns an unsubscribe.
+- `setContext(context)`: what is on the page, read beside every message, never shown.
 
 ### `nebo.surfaces`
 The app's live channel. Call `connect()` before using `nebo.a2ui`: it is the socket that carries interactive cards from the employee to the page.

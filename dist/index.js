@@ -590,6 +590,7 @@ const q = "nebo-chat-style", he = `
 .nebo-chat__composer{display:flex;gap:8px;align-items:flex-end;padding:12px;border-top:1px solid var(--nc-line)}
 .nebo-chat__input{flex:1;resize:none;border:1px solid var(--nc-line);border-radius:14px;padding:10px 14px;background:var(--nc-bg);color:var(--nc-fg);font:inherit;max-height:160px;outline:none}
 .nebo-chat__input:focus{border-color:var(--nc-accent)}
+.nebo-chat__input::placeholder{color:var(--nc-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nebo-chat__button{flex:none;height:44px;min-width:44px;padding:0 16px;border:0;border-radius:22px;background:var(--nc-accent);color:#fff;font:600 15px/1 inherit;font-family:inherit;cursor:pointer}
 .nebo-chat__button:disabled{opacity:.4;cursor:default}
 .nebo-chat__button--stop{background:var(--nc-fg);color:var(--nc-bg)}

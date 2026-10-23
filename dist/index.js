@@ -1,40 +1,38 @@
-let d = null, h = null;
+let h = null, l = null;
 function i() {
-  if (d) return d;
+  if (h) return h;
   if (window.location.protocol === "neboapp:")
-    return d = window.location.hostname, d;
-  const s = window.location.pathname.match(/^\/apps\/([^/]+)\/ui/);
-  if (s)
-    return d = s[1], d;
+    return h = window.location.hostname, h;
+  const t = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
+  if (t)
+    return h = decodeURIComponent(t[1]), h;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return d = e.getAttribute("content") || "", d;
+    return h = e.getAttribute("content") || "", h;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function l() {
-  if (h) return h;
-  if (window.location.protocol === "neboapp:")
-    return h = "http://localhost:27895", h;
-  const s = document.querySelector('meta[name="nebo-base-url"]');
-  return s ? (h = s.getAttribute("content") || "", h) : (h = window.location.origin, h);
+function d() {
+  if (l) return l;
+  const t = document.querySelector('meta[name="nebo-base-url"]');
+  return t ? (l = t.getAttribute("content") || "", l) : window.location.protocol === "neboapp:" ? (l = "http://localhost:27895", l) : (l = window.location.origin, l);
 }
-function k(s) {
-  d = s;
+function k(t) {
+  h = t;
 }
-function x(s) {
-  h = s;
+function x(t) {
+  l = t;
 }
-async function D(s, e) {
-  const t = i(), n = l();
-  if (s.startsWith("http://") || s.startsWith("https://")) {
-    const f = `${n}/api/v1/apps/${t}/http/proxy`, r = {};
+async function C(t, e) {
+  const s = i(), a = d();
+  if (t.startsWith("http://") || t.startsWith("https://")) {
+    const f = `${a}/api/v1/apps/${s}/http/proxy`, r = {};
     e != null && e.headers && new Headers(e.headers).forEach((E, j) => {
       r[j] = E;
     });
     const p = {
-      url: s,
+      url: t,
       method: (e == null ? void 0 : e.method) || "GET",
       headers: r,
       body: e != null && e.body ? String(e.body) : void 0
@@ -48,28 +46,28 @@ async function D(s, e) {
       headers: u.headers
     });
   }
-  const a = s.startsWith("/") ? s : `/${s}`, c = `${n}/api/v1/apps/${t}/api${a}`;
+  const n = t.startsWith("/") ? t : `/${t}`, c = `${a}/api/v1/apps/${s}/api${n}`;
   return fetch(c, e);
 }
-class N {
+class I {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const t = i(), a = l().replace(/^http/, "ws");
-    this.url = `${a}/ws/app/${t}`, this.connect();
+    const s = i(), n = d().replace(/^http/, "ws");
+    this.url = `${n}/ws/app/${s}`, this.connect();
   }
   connect() {
     this._closed || (this.ws = new WebSocket(this.url), this.ws.onopen = (e) => {
-      var t;
-      this.reconnectDelay = 1e3, (t = this.onopen) == null || t.call(this, e);
+      var s;
+      this.reconnectDelay = 1e3, (s = this.onopen) == null || s.call(this, e);
     }, this.ws.onmessage = (e) => {
-      var t;
-      return (t = this.onmessage) == null ? void 0 : t.call(this, e);
+      var s;
+      return (s = this.onmessage) == null ? void 0 : s.call(this, e);
     }, this.ws.onerror = (e) => {
-      var t;
-      return (t = this.onerror) == null ? void 0 : t.call(this, e);
+      var s;
+      return (s = this.onerror) == null ? void 0 : s.call(this, e);
     }, this.ws.onclose = (e) => {
-      var t;
-      (t = this.onclose) == null || t.call(this, e), this._closed || this.scheduleReconnect();
+      var s;
+      (s = this.onclose) == null || s.call(this, e), this._closed || this.scheduleReconnect();
     });
   }
   scheduleReconnect() {
@@ -82,34 +80,34 @@ class N {
     return ((e = this.ws) == null ? void 0 : e.readyState) ?? WebSocket.CLOSED;
   }
   send(e) {
-    var t;
-    (t = this.ws) == null || t.send(e);
+    var s;
+    (s = this.ws) == null || s.send(e);
   }
-  close(e, t) {
-    var n;
-    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (n = this.ws) == null || n.close(e, t);
+  close(e, s) {
+    var a;
+    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, s);
   }
 }
 const T = /* @__PURE__ */ new Set();
-let _ = null;
-function J() {
-  _ || (_ = new N(), _.onmessage = (s) => {
+let $ = null;
+function D() {
+  $ || ($ = new I(), $.onmessage = (t) => {
     let e;
     try {
-      e = JSON.parse(s.data);
+      e = JSON.parse(t.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== i() || T.forEach((t) => t(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== i() || T.forEach((s) => s(e.data));
   });
 }
-function C(s) {
-  if (typeof s != "string") return s;
+function J(t) {
+  if (typeof t != "string") return t;
   let e;
   try {
-    e = JSON.parse(s);
+    e = JSON.parse(t);
   } catch {
-    return s;
+    return t;
   }
   if (typeof e != "string") return e;
   try {
@@ -118,79 +116,79 @@ function C(s) {
     return e;
   }
 }
-function b(s) {
-  const e = i(), t = l();
-  return s ? `${t}/api/v1/apps/${e}/storage/${encodeURIComponent(s)}` : `${t}/api/v1/apps/${e}/storage`;
+function b(t) {
+  const e = i(), s = d();
+  return t ? `${s}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${s}/api/v1/apps/${e}/storage`;
 }
-const P = {
-  async getItem(s) {
-    const e = await fetch(b(s));
+const U = {
+  async getItem(t) {
+    const e = await fetch(b(t));
     if (e.status === 404) return null;
-    const t = await e.json();
-    return C(t.value);
+    const s = await e.json();
+    return J(s.value);
   },
-  async setItem(s, e) {
-    const t = typeof e == "string" ? e : JSON.stringify(e);
-    await fetch(b(s), {
+  async setItem(t, e) {
+    const s = typeof e == "string" ? e : JSON.stringify(e);
+    await fetch(b(t), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: t })
+      body: JSON.stringify({ value: s })
     });
   },
-  async removeItem(s) {
-    await fetch(b(s), { method: "DELETE" });
+  async removeItem(t) {
+    await fetch(b(t), { method: "DELETE" });
   },
   async clear() {
-    const s = await this.keys();
-    await Promise.all(s.map((e) => this.removeItem(e)));
+    const t = await this.keys();
+    await Promise.all(t.map((e) => this.removeItem(e)));
   },
   async keys() {
-    return ((await (await fetch(b())).json()).items || []).map((t) => t[0]);
+    return ((await (await fetch(b())).json()).items || []).map((s) => s[0]);
   },
   /**
    * Call `handler` after every change to the store: the employee's writes
    * and other open views'. Returns a function that stops listening.
    */
-  onChange(s) {
-    return T.add(s), J(), () => {
-      T.delete(s);
+  onChange(t) {
+    return T.add(t), D(), () => {
+      T.delete(t);
     };
   }
 };
-function v(s) {
+function v(t) {
   const e = i();
-  return `${l()}/api/v1/apps/${e}/agents/${s}`;
+  return `${d()}/api/v1/apps/${e}/agents/${t}`;
 }
-const U = {
-  async invoke(s, e) {
+const P = {
+  async invoke(t, e) {
     return (await fetch(v("invoke"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: s,
+        message: t,
         agent: e == null ? void 0 : e.agent,
         data: e == null ? void 0 : e.data
       })
     })).json();
   },
-  async *stream(s, e) {
-    const t = await fetch(v("stream"), {
+  async *stream(t, e) {
+    const s = await fetch(v("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: s,
+        message: t,
         agent: e == null ? void 0 : e.agent,
         data: e == null ? void 0 : e.data
       })
     });
-    if (!t.body)
+    if (!s.body)
       throw new Error("No response body for streaming");
-    const n = t.body.getReader(), a = new TextDecoder();
+    const a = s.body.getReader(), n = new TextDecoder();
     let c = "";
     for (; ; ) {
-      const { done: f, value: r } = await n.read();
+      const { done: f, value: r } = await a.read();
       if (f) break;
-      c += a.decode(r, { stream: !0 });
+      c += n.decode(r, { stream: !0 });
       const p = c.split(`
 `);
       c = p.pop() || "";
@@ -207,36 +205,36 @@ const U = {
     }
   }
 };
-function I(s) {
+function N(t) {
   const e = i();
-  return `${l()}/api/v1/apps/${e}/janus/${s}`;
+  return `${d()}/api/v1/apps/${e}/janus/${t}`;
 }
 const W = {
-  async complete(s) {
-    const t = await (await fetch(I("complete"), {
+  async complete(t) {
+    const s = await (await fetch(N("complete"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(s)
+      body: JSON.stringify(t)
     })).json();
-    return t.text || t.content || "";
+    return s.text || s.content || "";
   },
-  async *stream(s) {
-    const e = await fetch(I("stream"), {
+  async *stream(t) {
+    const e = await fetch(N("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(s)
+      body: JSON.stringify(t)
     });
     if (!e.body)
       throw new Error("No response body for streaming");
-    const t = e.body.getReader(), n = new TextDecoder();
-    let a = "";
+    const s = e.body.getReader(), a = new TextDecoder();
+    let n = "";
     for (; ; ) {
-      const { done: c, value: f } = await t.read();
+      const { done: c, value: f } = await s.read();
       if (c) break;
-      a += n.decode(f, { stream: !0 });
-      const r = a.split(`
+      n += a.decode(f, { stream: !0 });
+      const r = n.split(`
 `);
-      a = r.pop() || "";
+      n = r.pop() || "";
       for (const p of r)
         if (p.startsWith("data: ")) {
           const y = p.slice(6);
@@ -250,27 +248,40 @@ const W = {
     }
   }
 };
-async function R(s) {
-  const e = await fetch(`${l()}/api/v1/apps/${i()}/janus/decide`, {
+async function R(t) {
+  const e = await fetch(`${d()}/api/v1/apps/${i()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(s)
-  }), t = await e.json().catch(() => ({}));
+    body: JSON.stringify(t)
+  }), s = await e.json().catch(() => ({}));
   if (!e.ok)
-    throw new Error(t.error || `decide failed (${e.status})`);
-  return t;
+    throw new Error(s.error || `decide failed (${e.status})`);
+  return s;
 }
-async function F(s) {
-  const e = new URLSearchParams(window.location.search), t = e.get("thread") || "", n = e.get("client") || "", a = await fetch(`${l()}/api/v1/apps/${i()}/share`, {
+async function F(t) {
+  const e = new URLSearchParams(window.location.search), s = e.get("thread") || "", a = e.get("client") || "", n = await fetch(`${d()}/api/v1/apps/${i()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: s.name, content: s.content, thread: t, client: n })
-  }), c = await a.json().catch(() => ({}));
-  if (!a.ok)
-    throw new Error(c.error || `share failed (${a.status})`);
+    body: JSON.stringify({ name: t.name, content: t.content, thread: s, client: a })
+  }), c = await n.json().catch(() => ({}));
+  if (!n.ok)
+    throw new Error(c.error || `share failed (${n.status})`);
   return c;
 }
-class M {
+const M = {
+  /**
+   * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
+   * part names nothing inside a granted folder and is refused here.
+   */
+  url(t) {
+    const e = t.split("/").filter((n) => n !== "");
+    if (e.some((n) => n === "." || n === ".."))
+      throw new Error(`[nebo-sdk] files.url: "${t}" climbs out of its folder; name the file inside the granted folder`);
+    const s = encodeURIComponent(i()), a = e.map(encodeURIComponent).join("/");
+    return `${d()}/api/v1/apps/${s}/files/${a}`;
+  }
+};
+class A {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -280,17 +291,17 @@ class M {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new N(), this.ws.onopen = () => {
+    this.ws || (this.ws = new I(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
-      var t, n;
+      var s, a;
       try {
-        const a = JSON.parse(e.data);
-        if (a.type === "a2ui_message" && ((t = a.data) != null && t.message)) {
-          (n = this._a2uiHandler) == null || n.call(this, a.data.message);
+        const n = JSON.parse(e.data);
+        if (n.type === "a2ui_message" && ((s = n.data) != null && s.message)) {
+          (a = this._a2uiHandler) == null || a.call(this, n.data.message);
           return;
         }
-        this.handleEvent(a);
+        this.handleEvent(n);
       } catch {
       }
     }, this.ws.onclose = () => {
@@ -304,20 +315,20 @@ class M {
     this.ws && (this.ws.close(), this.ws = null), this._connected = !1;
   }
   /** Subscribe to a specific event type (or '*' for all) */
-  on(e, t) {
-    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(t), () => {
-      var n;
-      (n = this.listeners.get(e)) == null || n.delete(t);
+  on(e, s) {
+    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(s), () => {
+      var a;
+      (a = this.listeners.get(e)) == null || a.delete(s);
     };
   }
   /** Remove a specific listener */
-  off(e, t) {
-    var n;
-    (n = this.listeners.get(e)) == null || n.delete(t);
+  off(e, s) {
+    var a;
+    (a = this.listeners.get(e)) == null || a.delete(s);
   }
   /** Send an action/event to the agent */
-  send(e, t) {
-    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...t }));
+  send(e, s) {
+    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...s }));
   }
   /** Request a state snapshot from the agent */
   requestState() {
@@ -330,50 +341,50 @@ class M {
   // ─── Internal ────────────────────────────────────────────────────
   handleEvent(e) {
     e.type === "state_snapshot" ? this.state = { ...e.snapshot } : e.type === "state_delta" && this.applyDelta(e.delta);
-    const t = this.listeners.get(e.type);
-    if (t)
-      for (const a of t)
+    const s = this.listeners.get(e.type);
+    if (s)
+      for (const n of s)
         try {
-          a(e);
+          n(e);
         } catch {
         }
-    const n = this.listeners.get("*");
-    if (n)
-      for (const a of n)
+    const a = this.listeners.get("*");
+    if (a)
+      for (const n of a)
         try {
-          a(e);
+          n(e);
         } catch {
         }
   }
   applyDelta(e) {
-    for (const t of e) {
-      const n = t.path.split("/").filter(Boolean);
-      if (n.length === 0) continue;
-      const a = this.resolveParent(n);
-      if (!a) continue;
-      const c = n[n.length - 1];
-      switch (t.op) {
+    for (const s of e) {
+      const a = s.path.split("/").filter(Boolean);
+      if (a.length === 0) continue;
+      const n = this.resolveParent(a);
+      if (!n) continue;
+      const c = a[a.length - 1];
+      switch (s.op) {
         case "add":
         case "replace":
-          a[c] = t.value;
+          n[c] = s.value;
           break;
         case "remove":
-          delete a[c];
+          delete n[c];
           break;
       }
     }
   }
   resolveParent(e) {
-    let t = this.state;
-    for (let n = 0; n < e.length - 1; n++) {
-      if (t == null || typeof t != "object") return null;
-      t = t[e[n]];
+    let s = this.state;
+    for (let a = 0; a < e.length - 1; a++) {
+      if (s == null || typeof s != "object") return null;
+      s = s[e[a]];
     }
-    return t;
+    return s;
   }
 }
-const $ = new M();
-class A {
+const _ = new A();
+class L {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -395,8 +406,8 @@ class A {
     if (this.processor)
       try {
         this.processor.processMessages([e]);
-      } catch (t) {
-        console.error("[nebo-sdk] A2UI processing error:", t);
+      } catch (s) {
+        console.error("[nebo-sdk] A2UI processing error:", s);
       }
   }
   /**
@@ -408,7 +419,7 @@ class A {
   /**
    * Send a v0.9 client action back to the agent.
    */
-  sendAction(e, t) {
+  sendAction(e, s) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
@@ -418,7 +429,7 @@ class A {
           action: {
             surfaceId: e,
             timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-            ...t
+            ...s
           }
         }
       }
@@ -427,62 +438,62 @@ class A {
   /**
    * Send a v0.9 client error report back to the agent.
    */
-  sendError(e, t, n, a) {
+  sendError(e, s, a, n) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
         surface_id: e,
         message: {
           version: "v0.9",
-          error: { code: t, surfaceId: e, message: n, path: a }
+          error: { code: s, surfaceId: e, message: a, path: n }
         }
       }
     }));
   }
 }
-const O = new A();
+const O = new L();
 let w = null;
-const L = {
+const H = {
   async get() {
     if (w) return w;
-    const s = i(), e = l(), t = await fetch(`${e}/api/v1/apps/${s}/identity`);
-    if (!t.ok)
-      throw new Error(`[nebo-sdk] identity fetch failed: ${t.status}`);
-    return w = await t.json(), w;
+    const t = i(), e = d(), s = await fetch(`${e}/api/v1/apps/${t}/identity`);
+    if (!s.ok)
+      throw new Error(`[nebo-sdk] identity fetch failed: ${s.status}`);
+    return w = await s.json(), w;
   },
   invalidate() {
     w = null;
   }
 };
 let o = null, S = null, g = [], m = null;
-function H(s) {
-  if (!(!s.data || typeof s.data.type != "string") && s.data.type.startsWith("nebo:")) {
-    s.data.type === "nebo:resize" && o && s.data.height && (o.style.height = `${s.data.height}px`);
+function q(t) {
+  if (!(!t.data || typeof t.data.type != "string") && t.data.type.startsWith("nebo:")) {
+    t.data.type === "nebo:resize" && o && t.data.height && (o.style.height = `${t.data.height}px`);
     for (const e of g)
-      e(s.data);
+      e(t.data);
   }
 }
-const q = {
-  mount(s, e) {
+const B = {
+  mount(t, e) {
     o && this.unmount();
-    const t = i(), n = l(), a = new URLSearchParams();
-    e != null && e.placeholder && a.set("placeholder", e.placeholder), e != null && e.theme && a.set("theme", e.theme), e != null && e.borderless && a.set("borderless", "1"), e != null && e.contextId && a.set("ctx", e.contextId), e != null && e.scope && a.set("scope", e.scope);
-    const c = a.toString(), f = `${n}/chat-embed/${t}${c ? "?" + c : ""}`, r = document.createElement("iframe");
-    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), s.appendChild(r), o = r, S = s, m = H, window.addEventListener("message", m);
+    const s = i(), a = d(), n = new URLSearchParams();
+    e != null && e.placeholder && n.set("placeholder", e.placeholder), e != null && e.theme && n.set("theme", e.theme), e != null && e.borderless && n.set("borderless", "1"), e != null && e.contextId && n.set("ctx", e.contextId), e != null && e.scope && n.set("scope", e.scope);
+    const c = n.toString(), f = `${a}/chat-embed/${s}${c ? "?" + c : ""}`, r = document.createElement("iframe");
+    r.src = f, r.style.width = "100%", r.style.height = (e == null ? void 0 : e.height) || "400px", r.style.border = e != null && e.borderless ? "none" : "", r.style.borderRadius = e != null && e.borderless ? "0" : "0.5rem", r.style.colorScheme = "normal", r.setAttribute("allow", "microphone"), t.appendChild(r), o = r, S = t, m = q, window.addEventListener("message", m);
   },
   unmount() {
     o && S && S.removeChild(o), m && (window.removeEventListener("message", m), m = null), o = null, S = null, g = [];
   },
-  send(s) {
+  send(t) {
     var e;
     (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
-      { type: "nebo:send", message: s },
+      { type: "nebo:send", message: t },
       "*"
     );
   },
-  onMessage(s) {
-    return g.push(s), () => {
-      g = g.filter((e) => e !== s);
+  onMessage(t) {
+    return g.push(t), () => {
+      g = g.filter((e) => e !== t);
     };
   },
   /**
@@ -492,24 +503,24 @@ const q = {
    * Call this whenever the user navigates or the displayed data changes.
    * Pass null to clear context.
    */
-  setContext(s) {
+  setContext(t) {
     var e;
     (e = o == null ? void 0 : o.contentWindow) == null || e.postMessage(
-      { type: "nebo:set-context", context: s },
+      { type: "nebo:set-context", context: t },
       "*"
     );
   },
   newThread() {
-    var s;
-    (s = o == null ? void 0 : o.contentWindow) == null || s.postMessage(
+    var t;
+    (t = o == null ? void 0 : o.contentWindow) == null || t.postMessage(
       { type: "nebo:new-thread" },
       "*"
     );
   }
 };
-class B {
+class z {
   constructor() {
-    this.fetch = D, this.WebSocket = N, this.storage = P, this.agents = U, this.janus = W, this.decide = R, this.share = F, this.surfaces = $, this.a2ui = O, this.identity = L, this.chat = q, $._a2uiHandler = (e) => O._handleMessage(e), O._setSendFn((e) => $._rawSend(e));
+    this.fetch = C, this.WebSocket = I, this.storage = U, this.agents = P, this.janus = W, this.decide = R, this.share = F, this.files = M, this.surfaces = _, this.a2ui = O, this.identity = H, this.chat = B, _._a2uiHandler = (e) => O._handleMessage(e), O._setSendFn((e) => _._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
@@ -518,25 +529,26 @@ class B {
     e.appId && k(e.appId), e.baseUrl && x(e.baseUrl);
   }
 }
-const G = new B();
+const K = new z();
 export {
-  A as NeboA2UI,
-  B as NeboSDK,
-  M as NeboSurfaces,
-  N as NeboWebSocket,
+  L as NeboA2UI,
+  z as NeboSDK,
+  A as NeboSurfaces,
+  I as NeboWebSocket,
   O as a2ui,
-  U as agents,
-  q as chat,
+  P as agents,
+  B as chat,
   R as decide,
+  M as files,
   i as getAppId,
-  l as getBaseUrl,
-  L as identity,
+  d as getBaseUrl,
+  H as identity,
   W as janus,
-  G as nebo,
-  D as neboFetch,
+  K as nebo,
+  C as neboFetch,
   k as setAppId,
   x as setBaseUrl,
   F as share,
-  P as storage,
-  $ as surfaces
+  U as storage,
+  _ as surfaces
 };

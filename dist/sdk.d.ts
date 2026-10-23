@@ -26,6 +26,9 @@ export declare class NeboSDK {
     };
     decide: typeof decide;
     share: typeof share;
+    files: {
+        url(path: string): string;
+    };
     surfaces: import("./surfaces").NeboSurfaces;
     a2ui: import("./a2ui").NeboA2UI;
     identity: {

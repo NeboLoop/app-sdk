@@ -17,10 +17,11 @@ export function getAppId(): string {
     return _appId;
   }
 
-  // Try URL path first: /apps/{id}/ui/...
-  const match = window.location.pathname.match(/^\/apps\/([^/]+)\/ui/);
+  // Try URL path first: /apps/{id}/ui/..., under the tunnel's /t/<bot>
+  // and the page's pass, /k/<pass>, when it has them.
+  const match = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
   if (match) {
-    _appId = match[1];
+    _appId = decodeURIComponent(match[1]);
     return _appId;
   }
 
@@ -40,17 +41,19 @@ export function getAppId(): string {
 export function getBaseUrl(): string {
   if (_baseUrl) return _baseUrl;
 
-  // Custom protocol: API calls go to the local Nebo server
-  if (window.location.protocol === 'neboapp:') {
-    _baseUrl = 'http://localhost:27895';
-    return _baseUrl;
-  }
-
-  // In production (same origin), base is just the origin
-  // In dev, check for nebo-base-url meta tag
+  // What Nebo told the page: its server's address with the page's own pass
+  // (`/k/<pass>`, the one credential an app's page carries), and the
+  // tunnel's prefix when it has one. Nebo writes it into every page it
+  // serves, on the desktop and over HTTP; in dev, write it yourself.
   const meta = document.querySelector('meta[name="nebo-base-url"]');
   if (meta) {
     _baseUrl = meta.getAttribute('content') || '';
+    return _baseUrl;
+  }
+
+  // Custom protocol: API calls go to the local Nebo server
+  if (window.location.protocol === 'neboapp:') {
+    _baseUrl = 'http://localhost:27895';
     return _baseUrl;
   }
 

@@ -29,6 +29,9 @@ export declare class NeboSDK {
     files: {
         url(path: string): string;
     };
+    plugins: {
+        run(slug: string, command: string, args?: Record<string, unknown>, options?: import("./plugins").PluginRunOptions): Promise<import("./plugins").PluginResult>;
+    };
     surfaces: import("./surfaces").NeboSurfaces;
     a2ui: import("./a2ui").NeboA2UI;
     identity: {

@@ -207,6 +207,46 @@ const project = await fetch(nebo.files.url('Media/Projects/reel/project.json')).
   can take it back in the app's settings, and Nebo asks again when an update
   adds a permission. Until then the route answers 403.
 
+### `nebo.plugins.run(slug, command, args?, options?)`
+Run a plugin installed on the bot directly, with no AI in the middle: the
+same command and flags the app's employee passes to its `plugin__<slug>`
+tool, run by Nebo the same way (the installed version, the employee's
+account, the same billing), with the result straight back. Use it for work a
+page needs at once: a scrub strip, a waveform, a thumbnail, a quick preview.
+
+```js
+const strip = await nebo.plugins.run('nebo-media', 'strip', { in: 'Media/Projects/reel/cut.mp4', every: 2 });
+// strip → { ok: true, output: '…Result: /…/strip.jpg (…)', files: ['/…/strip.jpg'] }
+
+// Long work: each line the plugin writes, as it writes it.
+const preview = await nebo.plugins.run('nebo-media', 'preview', { in: cut }, {
+  timeout: 600,
+  onProgress: (line) => (status.textContent = line),
+});
+```
+
+- The manifest grants the plugin: `"permissions": ["plugin:nebo-media"]` for
+  every command, or `"plugin:nebo-media:strip"` for one command each.
+- An app made on the bot has what it declares. An app installed from the
+  marketplace needs the owner's OK first ("Media Studio wants to use Nebo
+  Media").
+- `args`: each key becomes `--key`; a number, true/false, an object or a list
+  goes as its JSON.
+- `timeout`: seconds, 120 unless given, at most 600. An app has at most 4
+  runs going at once (429 beyond that). It runs as its own employee and never
+  signs in or out of an account; the owner does that in the employee's settings.
+- `ok: false` is the plugin's own failure, with its words in `output`.
+- Throws an `Error` whose message is the reason when Nebo refuses the call:
+  403 (the manifest grants no such plugin or command, or the owner has not
+  allowed it), 404 (the plugin is not installed, or it is turned off), 429
+  (4 runs already going).
+- An app's sidecar makes the same call with its `NEBO_APP_TOKEN`:
+  `POST /api/v1/apps/<id>/plugins/<slug>/run` with `{command, args, timeout,
+  background}`; `background: true` answers `202 {job}`, and
+  `GET /api/v1/apps/<id>/plugins/jobs/<job>` reads it (JSON, or a
+  `text/event-stream` of `progress` events and one `result`).
+- Types: `PluginResult`, `PluginRunOptions`.
+
 ### `nebo.chat`
 The page's conversation with its own employee. The page talks to that one
 employee only, with its own pass, wherever it is open (the desktop window, a

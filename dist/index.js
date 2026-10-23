@@ -1,40 +1,40 @@
-let y = null, w = null;
-function f() {
-  if (y) return y;
+let w = null, _ = null;
+function u() {
+  if (w) return w;
   if (window.location.protocol === "neboapp:")
-    return y = window.location.hostname, y;
+    return w = window.location.hostname, w;
   const t = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
   if (t)
-    return y = decodeURIComponent(t[1]), y;
+    return w = decodeURIComponent(t[1]), w;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return y = e.getAttribute("content") || "", y;
+    return w = e.getAttribute("content") || "", w;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
 function m() {
-  if (w) return w;
+  if (_) return _;
   const t = document.querySelector('meta[name="nebo-base-url"]');
-  return t ? (w = t.getAttribute("content") || "", w) : window.location.protocol === "neboapp:" ? (w = "http://localhost:27895", w) : (w = window.location.origin, w);
+  return t ? (_ = t.getAttribute("content") || "", _) : window.location.protocol === "neboapp:" ? (_ = "http://localhost:27895", _) : (_ = window.location.origin, _);
 }
-function ee(t) {
-  y = t;
-}
-function te(t) {
+function ne(t) {
   w = t;
 }
-async function ne(t, e) {
-  const n = f(), a = m();
+function ae(t) {
+  _ = t;
+}
+async function se(t, e) {
+  const n = u(), a = m();
   if (t.startsWith("http://") || t.startsWith("https://")) {
-    const d = `${a}/api/v1/apps/${n}/http/proxy`, i = {};
-    e != null && e.headers && new Headers(e.headers).forEach((I, k) => {
-      i[k] = I;
+    const d = `${a}/api/v1/apps/${n}/http/proxy`, c = {};
+    e != null && e.headers && new Headers(e.headers).forEach((g, $) => {
+      c[$] = g;
     });
     const h = {
       url: t,
       method: (e == null ? void 0 : e.method) || "GET",
-      headers: i,
+      headers: c,
       body: e != null && e.body ? String(e.body) : void 0
     }, l = await fetch(d, {
       method: "POST",
@@ -42,19 +42,19 @@ async function ne(t, e) {
       body: JSON.stringify(h)
     });
     if (!l.ok) return l;
-    const c = await l.json();
-    return new Response(c.body, {
-      status: c.status,
-      headers: c.headers
+    const i = await l.json();
+    return new Response(i.body, {
+      status: i.status,
+      headers: i.headers
     });
   }
   const s = t.startsWith("/") ? t : `/${t}`, o = `${a}/api/v1/apps/${n}/api${s}`;
   return fetch(o, e);
 }
-class N {
+class I {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const n = f(), s = m().replace(/^http/, "ws");
+    const n = u(), s = m().replace(/^http/, "ws");
     this.url = `${s}/ws/app/${n}`, this.connect();
   }
   connect() {
@@ -91,19 +91,19 @@ class N {
   }
 }
 const W = /* @__PURE__ */ new Set();
-let D = null;
-function ae() {
-  D || (D = new N(), D.onmessage = (t) => {
+let U = null;
+function re() {
+  U || (U = new I(), U.onmessage = (t) => {
     let e;
     try {
       e = JSON.parse(t.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== f() || W.forEach((n) => n(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== u() || W.forEach((n) => n(e.data));
   });
 }
-function se(t) {
+function oe(t) {
   if (typeof t != "string") return t;
   let e;
   try {
@@ -118,50 +118,50 @@ function se(t) {
     return e;
   }
 }
-function T(t) {
-  const e = f(), n = m();
+function O(t) {
+  const e = u(), n = m();
   return t ? `${n}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${n}/api/v1/apps/${e}/storage`;
 }
-const re = {
+const ce = {
   async getItem(t) {
-    const e = await fetch(T(t));
+    const e = await fetch(O(t));
     if (e.status === 404) return null;
     const n = await e.json();
-    return se(n.value);
+    return oe(n.value);
   },
   async setItem(t, e) {
     const n = typeof e == "string" ? e : JSON.stringify(e);
-    await fetch(T(t), {
+    await fetch(O(t), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value: n })
     });
   },
   async removeItem(t) {
-    await fetch(T(t), { method: "DELETE" });
+    await fetch(O(t), { method: "DELETE" });
   },
   async clear() {
     const t = await this.keys();
     await Promise.all(t.map((e) => this.removeItem(e)));
   },
   async keys() {
-    return ((await (await fetch(T())).json()).items || []).map((n) => n[0]);
+    return ((await (await fetch(O())).json()).items || []).map((n) => n[0]);
   },
   /**
    * Call `handler` after every change to the store: the employee's writes
    * and other open views'. Returns a function that stops listening.
    */
   onChange(t) {
-    return W.add(t), ae(), () => {
+    return W.add(t), re(), () => {
       W.delete(t);
     };
   }
 };
 function H(t) {
-  const e = f();
+  const e = u();
   return `${m()}/api/v1/apps/${e}/agents/${t}`;
 }
-const oe = {
+const ie = {
   async invoke(t, e) {
     return (await fetch(H("invoke"), {
       method: "POST",
@@ -188,30 +188,30 @@ const oe = {
     const a = n.body.getReader(), s = new TextDecoder();
     let o = "";
     for (; ; ) {
-      const { done: d, value: i } = await a.read();
+      const { done: d, value: c } = await a.read();
       if (d) break;
-      o += s.decode(i, { stream: !0 });
+      o += s.decode(c, { stream: !0 });
       const h = o.split(`
 `);
       o = h.pop() || "";
       for (const l of h)
         if (l.startsWith("data: ")) {
-          const c = l.slice(6);
-          if (c === "[DONE]") return;
+          const i = l.slice(6);
+          if (i === "[DONE]") return;
           try {
-            yield JSON.parse(c);
+            yield JSON.parse(i);
           } catch {
-            yield { text: c, done: !1 };
+            yield { text: i, done: !1 };
           }
         }
     }
   }
 };
 function q(t) {
-  const e = f();
+  const e = u();
   return `${m()}/api/v1/apps/${e}/janus/${t}`;
 }
-const ce = {
+const de = {
   async complete(t) {
     const n = await (await fetch(q("complete"), {
       method: "POST",
@@ -234,10 +234,10 @@ const ce = {
       const { done: o, value: d } = await n.read();
       if (o) break;
       s += a.decode(d, { stream: !0 });
-      const i = s.split(`
+      const c = s.split(`
 `);
-      s = i.pop() || "";
-      for (const h of i)
+      s = c.pop() || "";
+      for (const h of c)
         if (h.startsWith("data: ")) {
           const l = h.slice(6);
           if (l === "[DONE]") return;
@@ -250,8 +250,8 @@ const ce = {
     }
   }
 };
-async function ie(t) {
-  const e = await fetch(`${m()}/api/v1/apps/${f()}/janus/decide`, {
+async function le(t) {
+  const e = await fetch(`${m()}/api/v1/apps/${u()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(t)
@@ -260,8 +260,8 @@ async function ie(t) {
     throw new Error(n.error || `decide failed (${e.status})`);
   return n;
 }
-async function de(t) {
-  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${m()}/api/v1/apps/${f()}/share`, {
+async function he(t) {
+  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${m()}/api/v1/apps/${u()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ name: t.name, content: t.content, thread: n, client: a })
@@ -270,7 +270,7 @@ async function de(t) {
     throw new Error(o.error || `share failed (${s.status})`);
   return o;
 }
-const le = {
+const ue = {
   /**
    * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
    * part names nothing inside a granted folder and is refused here.
@@ -279,11 +279,60 @@ const le = {
     const e = t.split("/").filter((s) => s !== "");
     if (e.some((s) => s === "." || s === ".."))
       throw new Error(`[nebo-sdk] files.url: "${t}" climbs out of its folder; name the file inside the granted folder`);
-    const n = encodeURIComponent(f()), a = e.map(encodeURIComponent).join("/");
+    const n = encodeURIComponent(u()), a = e.map(encodeURIComponent).join("/");
     return `${m()}/api/v1/apps/${n}/files/${a}`;
   }
 };
-class he {
+function Q(t) {
+  return `${m()}/api/v1/apps/${encodeURIComponent(u())}/plugins/${t}`;
+}
+async function V(t) {
+  const e = await t.text().catch(() => "");
+  return new Error(e || `plugin call failed (${t.status})`);
+}
+async function fe(t, e) {
+  const n = await fetch(Q(`jobs/${encodeURIComponent(t)}`), {
+    headers: { Accept: "text/event-stream" }
+  });
+  if (!n.ok || !n.body) throw await V(n);
+  const a = n.body.getReader(), s = new TextDecoder();
+  let o = "", d = "", c = [];
+  for (; ; ) {
+    const { done: h, value: l } = await a.read();
+    if (h) break;
+    o += s.decode(l, { stream: !0 });
+    const i = o.split(`
+`);
+    o = i.pop() || "";
+    for (const x of i) {
+      const g = x.replace(/\r$/, "");
+      if (g === "") {
+        if (d === "result") return JSON.parse(c.join(`
+`));
+        d === "progress" && e(c.join(`
+`)), d = "", c = [];
+      } else g.startsWith("event:") ? d = g.slice(6).trim() : g.startsWith("data:") && c.push(g.slice(5).replace(/^ /, ""));
+    }
+  }
+  throw new Error("the plugin job ended without a result");
+}
+const pe = {
+  /**
+   * Run `command` on the installed plugin `slug`, with `args` as its flags
+   * (each key becomes `--key`; objects and lists go as JSON).
+   */
+  async run(t, e, n = {}, a = {}) {
+    const s = typeof a.onProgress == "function", o = await fetch(Q(`${encodeURIComponent(t)}/run`), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ command: e, args: n, timeout: a.timeout, background: s })
+    });
+    if (!o.ok) throw await V(o);
+    const d = await o.json();
+    return s ? fe(d.job, a.onProgress) : d;
+  }
+};
+class me {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -293,7 +342,7 @@ class he {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new N(), this.ws.onopen = () => {
+    this.ws || (this.ws = new I(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
       var n, a;
@@ -385,8 +434,8 @@ class he {
     return n;
   }
 }
-const U = new he();
-class ue {
+const D = new me();
+class ge {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -453,49 +502,49 @@ class ue {
     }));
   }
 }
-const J = new ue();
-let $ = null;
-const fe = {
+const J = new ge();
+let C = null;
+const be = {
   async get() {
-    if ($) return $;
-    const t = f(), e = m(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
+    if (C) return C;
+    const t = u(), e = m(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
     if (!n.ok)
       throw new Error(`[nebo-sdk] identity fetch failed: ${n.status}`);
-    return $ = await n.json(), $;
+    return C = await n.json(), C;
   },
   invalidate() {
-    $ = null;
+    C = null;
   }
-}, O = /* @__PURE__ */ new Set();
-let v = null, B = null;
-function Q(t = "") {
-  return `${m()}/api/v1/apps/${encodeURIComponent(f())}/chat${t}`;
+}, N = /* @__PURE__ */ new Set();
+let k = null, B = null;
+function X(t = "") {
+  return `${m()}/api/v1/apps/${encodeURIComponent(u())}/chat${t}`;
 }
-function pe(t) {
+function ye(t) {
   if (typeof t != "string") return null;
-  const e = `agent:${f()}:page`;
+  const e = `agent:${u()}:page`;
   if (t !== e)
     return t.startsWith(e + ":") ? t.slice(e.length + 1) : null;
 }
-function x(t) {
-  O.forEach((e) => e(t));
+function S(t) {
+  N.forEach((e) => e(t));
 }
 let R = !1;
-function C() {
-  v || (R = !1, v = new N(), v.onopen = () => {
-    R && x({ type: "reconnected" }), R = !0;
-  }, v.onmessage = (t) => {
+function T() {
+  k || (R = !1, k = new I(), k.onopen = () => {
+    R && S({ type: "reconnected" }), R = !0;
+  }, k.onmessage = (t) => {
     let e;
     try {
       e = JSON.parse(t.data);
     } catch {
       return;
     }
-    const n = e.data ?? {}, a = pe(n.session_id);
+    const n = e.data ?? {}, a = ye(n.session_id);
     if (a !== null)
       switch (e.type) {
         case "chat_user_message":
-          x({
+          S({
             type: "message",
             thread: a,
             message: {
@@ -507,36 +556,36 @@ function C() {
           });
           break;
         case "chat_stream":
-          typeof n.content == "string" && n.content && x({ type: "stream", thread: a, text: n.content });
+          typeof n.content == "string" && n.content && S({ type: "stream", thread: a, text: n.content });
           break;
         case "chat_complete":
           if (n.stop_reason === "queued_into_running_turn") break;
-          x({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
+          S({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
           break;
         case "chat_error":
-          x({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
+          S({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
           break;
         case "chat_cancelled":
-          x({ type: "stopped", thread: a });
+          S({ type: "stopped", thread: a });
           break;
         case "chat_waiting":
-          x({ type: "waiting", thread: a });
+          S({ type: "waiting", thread: a });
           break;
       }
   });
 }
-class V extends Error {
+class Z extends Error {
   constructor(e, n) {
     super(n), this.status = e;
   }
 }
 async function P(t, e) {
-  const n = await fetch(Q(t), {
+  const n = await fetch(X(t), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(e)
   });
-  if (!n.ok) throw new V(n.status, await n.text() || `chat: ${n.status}`);
+  if (!n.ok) throw new Z(n.status, await n.text() || `chat: ${n.status}`);
   return n;
 }
 const E = {
@@ -545,8 +594,8 @@ const E = {
     const e = new URLSearchParams();
     t != null && t.thread && e.set("thread", t.thread), t != null && t.before && e.set("before", t.before), t != null && t.limit && e.set("limit", String(t.limit));
     const n = e.toString();
-    C();
-    const a = await fetch(Q(n ? `?${n}` : ""));
+    T();
+    const a = await fetch(X(n ? `?${n}` : ""));
     if (!a.ok) throw new Error(await a.text() || `chat: ${a.status}`);
     const s = await a.json();
     return { messages: s.messages ?? [], running: !!s.running, waiting: !!s.waiting, hasMore: !!s.hasMore };
@@ -555,21 +604,21 @@ const E = {
    *  One message at a time: while a reply is on its way, a send is refused
    *  (stop it or wait). */
   async send(t, e) {
-    C(), await P("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: B });
+    T(), await P("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: B });
   },
   /** Stop the turn running in the conversation. */
   async stop(t) {
-    C(), await P("/stop", { thread: t == null ? void 0 : t.thread });
+    T(), await P("/stop", { thread: t == null ? void 0 : t.thread });
   },
   /** Start the conversation over; the one before stays with the owner. */
   async newThread(t) {
-    C(), await P("/new", { thread: t == null ? void 0 : t.thread }), u && u.thread === ((t == null ? void 0 : t.thread) || void 0) && u.reset();
+    T(), await P("/new", { thread: t == null ? void 0 : t.thread }), f && f.thread === ((t == null ? void 0 : t.thread) || void 0) && f.reset();
   },
   /** Hear the conversation live: words sent (from any open view), the
    *  reply as it streams, and how each turn ends. Returns an unsubscribe. */
   onMessage(t) {
-    return C(), O.add(t), () => {
-      O.delete(t), K();
+    return T(), N.add(t), () => {
+      N.delete(t), K();
     };
   },
   /** What is on the page, sent beside every message. `null` clears it. */
@@ -578,17 +627,17 @@ const E = {
   },
   /** A ready chat with the employee, drawn inside `element`. */
   mount(t, e) {
-    u == null || u.destroy(), u = be(t, e ?? {});
+    f == null || f.destroy(), f = xe(t, e ?? {});
   },
   unmount() {
-    u == null || u.destroy(), u = null, K();
+    f == null || f.destroy(), f = null, K();
   }
 };
 function K() {
-  O.size || u || !v || (v.close(), v = null);
+  N.size || f || !k || (k.close(), k = null);
 }
-let u = null;
-const G = "nebo-chat-style", me = `
+let f = null;
+const G = "nebo-chat-style", we = `
 .nebo-chat{--nc-bg:#fff;--nc-fg:#16181d;--nc-muted:#6b7280;--nc-line:#e5e7eb;--nc-me:#16181d;--nc-me-fg:#fff;--nc-them:#f3f4f6;--nc-accent:#4f46e5;
   display:flex;flex-direction:column;height:100%;min-height:0;background:var(--nc-bg);color:var(--nc-fg);
   font:16px/1.6 "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--nc-line);border-radius:12px;overflow:hidden;box-sizing:border-box}
@@ -619,12 +668,12 @@ const G = "nebo-chat-style", me = `
 .nebo-chat__button:disabled{opacity:.4;cursor:default}
 .nebo-chat__button--stop{background:var(--nc-fg);color:var(--nc-bg)}
 `;
-function ge() {
+function _e() {
   if (document.getElementById(G)) return;
   const t = document.createElement("style");
-  t.id = G, t.textContent = me, document.head.appendChild(t);
+  t.id = G, t.textContent = we, document.head.appendChild(t);
 }
-function b(t, e) {
+function y(t, e) {
   const n = document.createElement(t);
   return n.className = e, n;
 }
@@ -641,58 +690,58 @@ function Y(t, e) {
     else if (d.startsWith("**"))
       t.appendChild(document.createElement("strong")).textContent = d.slice(2, -2);
     else {
-      const i = t.appendChild(document.createElement("a"));
-      i.href = d, i.target = "_blank", i.rel = "noopener noreferrer", i.textContent = d;
+      const c = t.appendChild(document.createElement("a"));
+      c.href = d, c.target = "_blank", c.rel = "noopener noreferrer", c.textContent = d;
     }
     a = o + d.length;
   }
   a < e.length && t.appendChild(document.createTextNode(e.slice(a)));
 }
-function be(t, e) {
-  ge();
-  const n = e.contextId || void 0, a = e.theme ?? "auto", s = b("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
+function xe(t, e) {
+  _e();
+  const n = e.contextId || void 0, a = e.theme ?? "auto", s = y("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
   e.height && (s.style.height = e.height);
-  const o = b("div", "nebo-chat__log");
+  const o = y("div", "nebo-chat__log");
   o.setAttribute("role", "log"), o.setAttribute("aria-live", "polite");
-  const d = b("form", "nebo-chat__composer"), i = b("textarea", "nebo-chat__input");
-  i.rows = 1, i.setAttribute("aria-label", "Message"), i.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
-  const h = b("button", "nebo-chat__button");
-  h.type = "submit", d.append(i, h), s.append(o, d), t.appendChild(s);
-  let l = !1, c = null;
-  const S = b("div", "nebo-chat__empty");
-  S.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
-  const I = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, k = (r = !1) => {
-    (r || I()) && (o.scrollTop = o.scrollHeight);
+  const d = y("form", "nebo-chat__composer"), c = y("textarea", "nebo-chat__input");
+  c.rows = 1, c.setAttribute("aria-label", "Message"), c.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
+  const h = y("button", "nebo-chat__button");
+  h.type = "submit", d.append(c, h), s.append(o, d), t.appendChild(s);
+  let l = !1, i = null;
+  const x = y("div", "nebo-chat__empty");
+  x.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
+  const g = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, $ = (r = !1) => {
+    (r || g()) && (o.scrollTop = o.scrollHeight);
   }, A = () => {
-    o.querySelector(".nebo-chat__msg") ? S.remove() : o.appendChild(S);
-  }, _ = (r, g) => {
-    S.remove();
-    const j = b("div", `nebo-chat__msg nebo-chat__msg--${r}`);
-    return Y(j, g), o.appendChild(j), j;
-  }, X = () => {
-    const r = b("div", "nebo-chat__msg nebo-chat__msg--assistant");
-    return r.appendChild(b("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), S.remove(), o.appendChild(r), r;
+    o.querySelector(".nebo-chat__msg") ? x.remove() : o.appendChild(x);
+  }, v = (r, b) => {
+    x.remove();
+    const j = y("div", `nebo-chat__msg nebo-chat__msg--${r}`);
+    return Y(j, b), o.appendChild(j), j;
+  }, ee = () => {
+    const r = y("div", "nebo-chat__msg nebo-chat__msg--assistant");
+    return r.appendChild(y("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), x.remove(), o.appendChild(r), r;
   }, M = () => {
-    !c || c.text || (c.node.classList.add("nebo-chat__msg--waiting"), c.node.textContent = e.name ? `${e.name} is waiting for your OK in Nebo.` : "Waiting for your OK in Nebo.");
+    !i || i.text || (i.node.classList.add("nebo-chat__msg--waiting"), i.node.textContent = e.name ? `${e.name} is waiting for your OK in Nebo.` : "Waiting for your OK in Nebo.");
   }, p = (r) => {
-    l = r, h.textContent = r ? "Stop" : "Send", h.classList.toggle("nebo-chat__button--stop", r), h.disabled = !r && !i.value.trim(), r && !c && (c = { node: X(), text: "" }, k(!0)), r || (c && !c.text && c.node.remove(), c = null, A());
+    l = r, h.textContent = r ? "Stop" : "Send", h.classList.toggle("nebo-chat__button--stop", r), h.disabled = !r && !c.value.trim(), r && !i && (i = { node: ee(), text: "" }, $(!0)), r || (i && !i.text && i.node.remove(), i = null, A());
   }, L = () => {
-    i.style.height = "auto", i.style.height = `${Math.min(i.scrollHeight, 160)}px`, l || (h.disabled = !i.value.trim());
+    c.style.height = "auto", c.style.height = `${Math.min(c.scrollHeight, 160)}px`, l || (h.disabled = !c.value.trim());
   }, F = async () => {
     p(!1), o.textContent = "";
     try {
       const r = await E.history({ thread: n });
-      for (const g of r.messages) _(g.role, g.content);
-      A(), p(r.running), r.running && r.waiting && M(), k(!0);
+      for (const b of r.messages) v(b.role, b.content);
+      A(), p(r.running), r.running && r.waiting && M(), $(!0);
     } catch {
-      _("error", "Could not load the conversation. Try again.");
+      v("error", "Could not load the conversation. Try again.");
     }
-  }, Z = E.onMessage((r) => {
+  }, te = E.onMessage((r) => {
     if (r.type === "reconnected") {
       F();
       return;
     }
-    r.thread === n && (r.type === "waiting" ? (c || p(!0), M()) : r.type === "message" ? l || (_("user", r.message.content), p(!0)) : r.type === "stream" ? (c || p(!0), c && (c.text += r.text, c.node.classList.remove("nebo-chat__msg--waiting"), c.node.textContent = "", Y(c.node, c.text), k())) : r.type === "error" ? (p(!1), _("error", r.error), k()) : (p(!1), r.type === "complete" && r.notice && _("note", r.notice)));
+    r.thread === n && (r.type === "waiting" ? (i || p(!0), M()) : r.type === "message" ? l || (v("user", r.message.content), p(!0)) : r.type === "stream" ? (i || p(!0), i && (i.text += r.text, i.node.classList.remove("nebo-chat__msg--waiting"), i.node.textContent = "", Y(i.node, i.text), $())) : r.type === "error" ? (p(!1), v("error", r.error), $()) : (p(!1), r.type === "complete" && r.notice && v("note", r.notice)));
   }), z = async () => {
     if (l) {
       try {
@@ -701,19 +750,19 @@ function be(t, e) {
       }
       return;
     }
-    const r = i.value.trim();
+    const r = c.value.trim();
     if (r) {
-      i.value = "", L(), _("user", r), p(!0);
+      c.value = "", L(), v("user", r), p(!0);
       try {
         await E.send(r, { thread: n, scope: e.scope });
-      } catch (g) {
-        p(!1), _("error", g instanceof V && g.status === 409 ? g.message : "Could not send. Try again.");
+      } catch (b) {
+        p(!1), v("error", b instanceof Z && b.status === 409 ? b.message : "Could not send. Try again.");
       }
     }
   };
   return d.addEventListener("submit", (r) => {
     r.preventDefault(), z();
-  }), i.addEventListener("input", L), i.addEventListener("keydown", (r) => {
+  }), c.addEventListener("input", L), c.addEventListener("keydown", (r) => {
     r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), z());
   }), p(!1), F(), {
     thread: n,
@@ -721,42 +770,43 @@ function be(t, e) {
       o.textContent = "", p(!1);
     },
     destroy() {
-      Z(), s.remove();
+      te(), s.remove();
     }
   };
 }
-class ye {
+class ve {
   constructor() {
-    this.fetch = ne, this.WebSocket = N, this.storage = re, this.agents = oe, this.janus = ce, this.decide = ie, this.share = de, this.files = le, this.surfaces = U, this.a2ui = J, this.identity = fe, this.chat = E, U._a2uiHandler = (e) => J._handleMessage(e), J._setSendFn((e) => U._rawSend(e));
+    this.fetch = se, this.WebSocket = I, this.storage = ce, this.agents = ie, this.janus = de, this.decide = le, this.share = he, this.files = ue, this.plugins = pe, this.surfaces = D, this.a2ui = J, this.identity = be, this.chat = E, D._a2uiHandler = (e) => J._handleMessage(e), J._setSendFn((e) => D._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
    */
   configure(e) {
-    e.appId && ee(e.appId), e.baseUrl && te(e.baseUrl);
+    e.appId && ne(e.appId), e.baseUrl && ae(e.baseUrl);
   }
 }
-const we = new ye();
+const Se = new ve();
 export {
-  V as ChatError,
-  ue as NeboA2UI,
-  ye as NeboSDK,
-  he as NeboSurfaces,
-  N as NeboWebSocket,
+  Z as ChatError,
+  ge as NeboA2UI,
+  ve as NeboSDK,
+  me as NeboSurfaces,
+  I as NeboWebSocket,
   J as a2ui,
-  oe as agents,
+  ie as agents,
   E as chat,
-  ie as decide,
-  le as files,
-  f as getAppId,
+  le as decide,
+  ue as files,
+  u as getAppId,
   m as getBaseUrl,
-  fe as identity,
-  ce as janus,
-  we as nebo,
-  ne as neboFetch,
-  ee as setAppId,
-  te as setBaseUrl,
-  de as share,
-  re as storage,
-  U as surfaces
+  be as identity,
+  de as janus,
+  Se as nebo,
+  se as neboFetch,
+  pe as plugins,
+  ne as setAppId,
+  ae as setBaseUrl,
+  he as share,
+  ce as storage,
+  D as surfaces
 };

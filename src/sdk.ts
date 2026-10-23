@@ -11,6 +11,7 @@ import { janus } from './janus';
 import { decide } from './decide';
 import { share } from './share';
 import { files } from './files';
+import { plugins } from './plugins';
 import { surfaces } from './surfaces';
 import { a2ui } from './a2ui';
 import { identity } from './identity';
@@ -25,6 +26,7 @@ export class NeboSDK {
   decide = decide;
   share = share;
   files = files;
+  plugins = plugins;
   surfaces = surfaces;
   a2ui = a2ui;
   identity = identity;

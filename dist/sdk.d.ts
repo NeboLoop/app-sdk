@@ -36,12 +36,22 @@ export declare class NeboSDK {
         invalidate(): void;
     };
     chat: {
+        history(options?: {
+            thread?: string;
+            before?: string;
+            limit?: number;
+        }): Promise<import("./chat").ChatHistory>;
+        send(message: string, options?: import("./chat").SendOptions): Promise<void>;
+        stop(options?: {
+            thread?: string;
+        }): Promise<void>;
+        newThread(options?: {
+            thread?: string;
+        }): Promise<void>;
+        onMessage(handler: (event: import("./chat").ChatEvent) => void): () => void;
+        setContext(next: import("./chat").ChatContext | null): void;
         mount(element: HTMLElement, options?: import("./chat").ChatOptions): void;
         unmount(): void;
-        send(message: string): void;
-        onMessage(handler: (msg: import("./chat").ChatMessage) => void): () => void;
-        setContext(context: import("./chat").ChatContext | null): void;
-        newThread(): void;
     };
     constructor();
     /**

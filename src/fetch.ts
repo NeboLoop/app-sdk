@@ -30,6 +30,10 @@ export async function neboFetch(input: string, init?: RequestInit): Promise<Resp
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(proxyBody)
     });
+    // Nebo itself refused or could not make the call (403 naming the
+    // permission the app lacks, 502 for an address it never reaches): that
+    // answer is the page's, as fetch() would give it, with its words.
+    if (!resp.ok) return resp;
     const data = await resp.json();
     // Reconstruct a Response-like object from the proxy result
     return new Response(data.body, {

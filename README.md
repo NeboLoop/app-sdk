@@ -45,7 +45,10 @@ const answer = await nebo.janus.complete({
   messages: [{ role: 'user', content: 'What is 2+2?' }],
 });
 
-// Embed chat panel
+// Show the owner's own files (needs "filesystem:read:Media/Projects")
+video.src = nebo.files.url('Media/Projects/reel/render.mp4');
+
+// A chat with the app's employee, drawn in the page
 nebo.chat.mount(document.getElementById('chat'), {
   placeholder: 'Ask about your deals...',
   theme: 'dark',
@@ -152,13 +155,131 @@ const { answers } = await nebo.decide({
 - Billed like any model call; see pricing at https://neboai.com/pricing.
 - Types: `DecideQuestion`, `DecideRequest`, `DecideAnswer`, `Decision`.
 
+### `nebo.share({ name, content })`
+Hand the owner a file to share. The file goes into his Work folder, beside
+the chat the app is open on, and Nebo opens its own Share dialog on it. He
+chooses who can open the link (anyone with it, a password, or only him) and
+when it ends. The link is `neboai.com/s/<token>`; an HTML file opens there as
+a live page. The page never makes or changes a link itself.
+
+```js
+const { artifact } = await nebo.share({ name: 'Launch deck.html', content: html });
+// artifact → '/api/v1/files/Design Studio/Launch deck.html'
+```
+
+- `content` is the file's text (HTML, Markdown, CSV, SVG …), up to the
+  bot's upload limit.
+- Sharing the same `name` again replaces the file in Work.
+- The Share dialog opens only on the device the page is open on (the screen
+  that opened it, named by the page's `?client=`), never on his other
+  devices.
+- Throws an `Error` whose message is the reason (400: a bad name or empty
+  content).
+
+### `nebo.files.url(path)`
+The address of one of the owner's files, for an `<img>`, `<video>`, `<audio>`
+or `fetch()`. `path` is relative to his NeboAI folder (`~/NeboAI`) and must be
+inside a folder the app's manifest grants it:
+
+```json
+"permissions": ["storage:readwrite", "filesystem:read:Media/Projects"]
+```
+
+```js
+video.src = nebo.files.url('Media/Projects/reel/versions/reel-v3.mp4');
+const project = await fetch(nebo.files.url('Media/Projects/reel/project.json')).then((r) => r.json());
+```
+
+- The address works wherever the page is open: the desktop window, a
+  browser, the mobile app. It carries the page's own pass, so never build an
+  `/api/v1/...` address yourself.
+- Read only. Files stream with byte ranges, so a video plays and seeks.
+- A path with a `.` or `..` part throws. A path outside every granted folder
+  is refused (403). A file that is missing, hidden (any part starting with
+  `.`, such as `.proxies` or `.env`), in a coding agent's folder, or reached
+  through a link out of the folder is not found (404). Hidden folders are
+  never served, so keep what the page shows in visible folders.
+- A grant is a folder inside `~/NeboAI`, relative to it: no leading `/`, no
+  `..`, no hidden part.
+- Who decides: an app the owner's own employees build on his Nebo gets its
+  grants as written. An app installed from the marketplace or shared through
+  a loop gets none until the owner allows it. Nebo asks him in plain words
+  ("Media Studio wants to see the files in NeboAI › Media › Projects"), he
+  can take it back in the app's settings, and Nebo asks again when an update
+  adds a permission. Until then the route answers 403.
+
+### `nebo.plugins.run(slug, command, args?, options?)`
+Run a plugin installed on the bot directly, with no AI in the middle: the
+same command and flags the app's employee passes to its `plugin__<slug>`
+tool, run by Nebo the same way (the installed version, the employee's
+account, the same billing), with the result straight back. Use it for work a
+page needs at once: a scrub strip, a waveform, a thumbnail, a quick preview.
+
+```js
+const strip = await nebo.plugins.run('nebo-media', 'strip', { in: 'Media/Projects/reel/cut.mp4', every: 2 });
+// strip → { ok: true, output: '…Result: /…/strip.jpg (…)', files: ['/…/strip.jpg'] }
+
+// Long work: each line the plugin writes, as it writes it.
+const preview = await nebo.plugins.run('nebo-media', 'preview', { in: cut }, {
+  timeout: 600,
+  onProgress: (line) => (status.textContent = line),
+});
+```
+
+- The manifest grants the plugin: `"permissions": ["plugin:nebo-media"]` for
+  every command, or `"plugin:nebo-media:strip"` for one command each.
+- An app made on the bot has what it declares. An app installed from the
+  marketplace needs the owner's OK first ("Media Studio wants to use Nebo
+  Media").
+- `args`: each key becomes `--key`; a number, true/false, an object or a list
+  goes as its JSON.
+- `timeout`: seconds, 120 unless given, at most 600. An app has at most 4
+  runs going at once (429 beyond that). It runs as its own employee and never
+  signs in or out of an account; the owner does that in the employee's settings.
+- `ok: false` is the plugin's own failure, with its words in `output`.
+- Throws an `Error` whose message is the reason when Nebo refuses the call:
+  403 (the manifest grants no such plugin or command, or the owner has not
+  allowed it), 404 (the plugin is not installed, or it is turned off), 429
+  (4 runs already going).
+- An app's sidecar makes the same call with its `NEBO_APP_TOKEN`:
+  `POST /api/v1/apps/<id>/plugins/<slug>/run` with `{command, args, timeout,
+  background}`; `background: true` answers `202 {job}`, and
+  `GET /api/v1/apps/<id>/plugins/jobs/<job>` reads it (JSON, or a
+  `text/event-stream` of `progress` events and one `result`).
+- Types: `PluginResult`, `PluginRunOptions`.
+
 ### `nebo.chat`
-- `mount(element, options?)`: Embed chat UI
-- `unmount()`: Remove chat UI
-- `send(message)`: Programmatically send a message
-- `onMessage(handler)`: Listen for chat events
-- `setContext(context)`: Update app context for the agent
-- `newThread()`: Start a new conversation
+The page's conversation with its own employee. The page talks to that one
+employee only, with its own pass, wherever it is open (the desktop window, a
+browser, the mobile app). What it sends is the app's words, never the
+owner's: install codes, slash commands, file paths and @mentions of other
+employees are just words to the employee, and the employee works as it does
+for any app request (no shell). The conversation is the app's own: it is not
+one of the owner's chats in Nebo, and his composer never writes into it. What
+the employee does on the way (its tools and their results) stays with the
+owner; the page hears the words.
+
+- `mount(element, options?)`: a ready chat in `element`: the history, the
+  reply as it streams, Enter to send, Stop while it works, and "waiting for
+  your OK" while the employee waits on the owner. Options: `placeholder`,
+  `theme` (`auto` | `light` | `dark`), `height`, `borderless`, `contextId` (a
+  conversation of its own per document or record: letters, digits, `-`,
+  `_`, `.`), `scope` (a tool scope your agent.json declares), `name` (what
+  the chat calls the employee). There is no voice and no @mentions.
+- `unmount()`: remove it.
+- `history({thread?, before?, limit?})`: `{messages, running, waiting, hasMore}`, oldest first.
+- `send(message, {thread?, scope?})`: say something; the reply comes through
+  `onMessage`. One message at a time: while a reply is on its way the send is
+  refused (`ChatError`, status 409, its message in plain words); the same
+  when the owner has turned the employee off.
+- `stop({thread?})`: stop the turn that is running.
+- `newThread({thread?})`: start over (not while a reply is on its way).
+- `onMessage(handler)`: `message` (words sent, from any open view), `stream`
+  (the reply as it comes), `waiting` (the turn waits on the owner's OK),
+  `complete` (with a `notice` when it stopped early), `error`, `stopped`, and
+  `reconnected` (the live connection came back: read the history again).
+  Returns an unsubscribe.
+- `setContext(context)`: what is on the page, read beside every message, never shown.
 
 ### `nebo.surfaces`
 The app's live channel. Call `connect()` before using `nebo.a2ui`: it is the socket that carries interactive cards from the employee to the page.
@@ -187,6 +308,28 @@ Call `nebo.surfaces.connect()` so cards arrive. Cards reach only the app they we
 
 ### `nebo.configure(options)`
 Set `appId` and `baseUrl` manually (auto-detected by default).
+
+## Where the page runs
+
+An app's page is confined to its own app:
+
+- It runs in an origin of its own. In a browser and in the mobile app Nebo
+  serves it in a sandbox (a Content-Security-Policy `sandbox` without
+  `allow-same-origin`), so it shares no cookies, storage or origin with
+  Nebo's own page or the neboai.com console. On the desktop it is its own
+  `neboapp://<id>` window.
+- It proves itself with its own pass, which Nebo puts in the page's address
+  (`/k/<pass>/apps/<id>/ui/…`) and its base URL. The pass reaches the app's
+  own routes (`/api/v1/apps/<id>/…`, its socket) and nothing else: not the
+  owner's files, agents or settings, and no other app's data. Every SDK call
+  carries it through `getBaseUrl()`; relative addresses carry it too.
+- `localStorage` keeps working: in the sandbox Nebo keeps it in the app's own
+  storage, under the key `localStorage`. `sessionStorage` lasts as long as
+  the page. Prefer `nebo.storage`, which the app's employee can read too.
+- `nebo.fetch` to another site needs `network:<domain>`, and invoking another
+  employee needs `subagent:<id>`. An app the owner's employees build on his
+  Nebo gets what its manifest asks for. One installed from the marketplace
+  or shared through a loop gets nothing until the owner allows it.
 
 ## What the page gets from Nebo (no SDK call needed)
 

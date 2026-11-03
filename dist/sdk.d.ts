@@ -4,6 +4,7 @@
 import { neboFetch } from './fetch';
 import { NeboWebSocket } from './websocket';
 import { decide } from './decide';
+import { share } from './share';
 export declare class NeboSDK {
     fetch: typeof neboFetch;
     WebSocket: typeof NeboWebSocket;
@@ -24,6 +25,13 @@ export declare class NeboSDK {
         stream(options: import("./types").JanusOptions): AsyncGenerator<string>;
     };
     decide: typeof decide;
+    share: typeof share;
+    files: {
+        url(path: string): string;
+    };
+    plugins: {
+        run(slug: string, command: string, args?: Record<string, unknown>, options?: import("./plugins").PluginRunOptions): Promise<import("./plugins").PluginResult>;
+    };
     surfaces: import("./surfaces").NeboSurfaces;
     a2ui: import("./a2ui").NeboA2UI;
     identity: {
@@ -31,12 +39,22 @@ export declare class NeboSDK {
         invalidate(): void;
     };
     chat: {
+        history(options?: {
+            thread?: string;
+            before?: string;
+            limit?: number;
+        }): Promise<import("./chat").ChatHistory>;
+        send(message: string, options?: import("./chat").SendOptions): Promise<void>;
+        stop(options?: {
+            thread?: string;
+        }): Promise<void>;
+        newThread(options?: {
+            thread?: string;
+        }): Promise<void>;
+        onMessage(handler: (event: import("./chat").ChatEvent) => void): () => void;
+        setContext(next: import("./chat").ChatContext | null): void;
         mount(element: HTMLElement, options?: import("./chat").ChatOptions): void;
         unmount(): void;
-        send(message: string): void;
-        onMessage(handler: (msg: import("./chat").ChatMessage) => void): () => void;
-        setContext(context: import("./chat").ChatContext | null): void;
-        newThread(): void;
     };
     constructor();
     /**

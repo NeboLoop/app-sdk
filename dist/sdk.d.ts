@@ -26,6 +26,10 @@ export declare class NeboSDK {
     };
     decide: typeof decide;
     share: typeof share;
+    listen: {
+        start(options: import("./listen").ListenOptions): Promise<void>;
+        stop(): Promise<void>;
+    };
     files: {
         url(path: string): string;
     };

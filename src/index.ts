@@ -11,6 +11,7 @@
  * - nebo.surfaces → real-time agent events (AG-UI)
  * - nebo.a2ui → agent-driven UI via @a2ui/web_core (A2UI v0.9)
  * - nebo.share → a file into the owner's Work, and Nebo's Share dialog on it
+ * - nebo.listen → hear the owner: Nebo opens the microphone and sends his words as he speaks
  * - nebo.files → the address of an owner's file in a folder the app is granted
  * - nebo.plugins → run a plugin installed on the bot directly, no AI in the middle
  * - nebo.identity → agent context (name, persona, skills, inputs)
@@ -33,6 +34,7 @@ export { decide } from './decide';
 export { neboFetch } from './fetch';
 export { identity } from './identity';
 export { share } from './share';
+export { listen } from './listen';
 export { files } from './files';
 export { plugins } from './plugins';
 export { chat, ChatError } from './chat';
@@ -43,6 +45,7 @@ export type {
 } from './types';
 export type { AgentIdentity } from './identity';
 export type { ShareFile, Shared } from './share';
+export type { Heard, ListenState, ListenOptions } from './listen';
 export type { PluginResult, PluginRunOptions } from './plugins';
 export type { ChatOptions, ChatContext, ChatMessage, ChatEvent, ChatHistory, SendOptions } from './chat';
 export type { A2UIMessageProcessor } from './a2ui';

@@ -175,6 +175,34 @@ const { artifact } = await nebo.share({ name: 'Launch deck.html', content: html 
 - Throws an `Error` whose message is the reason (400: a bad name or empty
   content).
 
+### `nebo.listen.start({ onWords, onState })` / `nebo.listen.stop()`
+Hear the owner. Nebo opens the microphone on the screen the page is open on,
+shows him that it is listening, and sends the page his words as he speaks.
+The page never opens a microphone itself. An app page has no microphone and
+no browser speech recognition of its own; this is how an app hears.
+
+```js
+await nebo.listen.start({
+  onWords: ({ text, final }) => { if (final) follow(text); },
+  onState: (state, reason) => setListening(state === 'listening'),
+});
+// later
+await nebo.listen.stop();
+```
+
+- The manifest asks for it: `"permissions": ["voice:listen"]`. An app from
+  the marketplace is allowed by the owner the first time it opens.
+- `onWords` gets `{ text, start, end, final }`. A partial (`final: false`) is
+  replaced by the next one for its span; a final stays and is punctuated.
+- `onState` gets `starting`, then `listening` once the microphone is open,
+  then `stopped`. `stopped` carries a `reason` in plain words when Nebo could
+  not listen.
+- Listening stops when the page asks, when the owner stops it, after two
+  minutes with no words, or after an hour.
+- Billed as transcription for as long as it listens; see pricing at
+  https://neboai.com/pricing.
+- `start` throws an `Error` when the app does not hold `voice:listen` (403).
+
 ### `nebo.files.url(path)`
 The address of one of the owner's files, for an `<img>`, `<video>`, `<audio>`
 or `fetch()`. `path` is relative to his NeboAI folder (`~/NeboAI`) and must be

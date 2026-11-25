@@ -1,38 +1,38 @@
-let w = null, _ = null;
+let _ = null, x = null;
 function u() {
-  if (w) return w;
+  if (_) return _;
   if (window.location.protocol === "neboapp:")
-    return w = window.location.hostname, w;
-  const t = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
-  if (t)
-    return w = decodeURIComponent(t[1]), w;
+    return _ = window.location.hostname, _;
+  const n = window.location.pathname.match(/^(?:\/t\/[^/]+)?(?:\/k\/[^/]+)?\/apps\/([^/]+)\/ui(?:\/|$)/);
+  if (n)
+    return _ = decodeURIComponent(n[1]), _;
   const e = document.querySelector('meta[name="nebo-app-id"]');
   if (e)
-    return w = e.getAttribute("content") || "", w;
+    return _ = e.getAttribute("content") || "", _;
   throw new Error(
     '[nebo-sdk] Cannot detect app ID. In production, serve from /apps/{id}/ui/. In dev, add <meta name="nebo-app-id" content="your-id"> to index.html.'
   );
 }
-function m() {
-  if (_) return _;
-  const t = document.querySelector('meta[name="nebo-base-url"]');
-  return t ? (_ = t.getAttribute("content") || "", _) : window.location.protocol === "neboapp:" ? (_ = "http://localhost:27895", _) : (_ = window.location.origin, _);
+function p() {
+  if (x) return x;
+  const n = document.querySelector('meta[name="nebo-base-url"]');
+  return n ? (x = n.getAttribute("content") || "", x) : window.location.protocol === "neboapp:" ? (x = "http://localhost:27895", x) : (x = window.location.origin, x);
 }
-function ne(t) {
-  w = t;
+function ie(n) {
+  _ = n;
 }
-function ae(t) {
-  _ = t;
+function de(n) {
+  x = n;
 }
-async function se(t, e) {
-  const n = u(), a = m();
-  if (t.startsWith("http://") || t.startsWith("https://")) {
-    const d = `${a}/api/v1/apps/${n}/http/proxy`, c = {};
-    e != null && e.headers && new Headers(e.headers).forEach((g, $) => {
-      c[$] = g;
+async function le(n, e) {
+  const t = u(), a = p();
+  if (n.startsWith("http://") || n.startsWith("https://")) {
+    const d = `${a}/api/v1/apps/${t}/http/proxy`, c = {};
+    e != null && e.headers && new Headers(e.headers).forEach((b, E) => {
+      c[E] = b;
     });
     const h = {
-      url: t,
+      url: n,
       method: (e == null ? void 0 : e.method) || "GET",
       headers: c,
       body: e != null && e.body ? String(e.body) : void 0
@@ -48,28 +48,28 @@ async function se(t, e) {
       headers: i.headers
     });
   }
-  const s = t.startsWith("/") ? t : `/${t}`, o = `${a}/api/v1/apps/${n}/api${s}`;
+  const s = n.startsWith("/") ? n : `/${n}`, o = `${a}/api/v1/apps/${t}/api${s}`;
   return fetch(o, e);
 }
-class I {
+class U {
   constructor(e) {
     this.ws = null, this.reconnectTimer = null, this.reconnectDelay = 1e3, this.maxReconnectDelay = 3e4, this._closed = !1, this.onopen = null, this.onmessage = null, this.onerror = null, this.onclose = null;
-    const n = u(), s = m().replace(/^http/, "ws");
-    this.url = `${s}/ws/app/${n}`, this.connect();
+    const t = u(), s = p().replace(/^http/, "ws");
+    this.url = `${s}/ws/app/${t}`, this.connect();
   }
   connect() {
     this._closed || (this.ws = new WebSocket(this.url), this.ws.onopen = (e) => {
-      var n;
-      this.reconnectDelay = 1e3, (n = this.onopen) == null || n.call(this, e);
+      var t;
+      this.reconnectDelay = 1e3, (t = this.onopen) == null || t.call(this, e);
     }, this.ws.onmessage = (e) => {
-      var n;
-      return (n = this.onmessage) == null ? void 0 : n.call(this, e);
+      var t;
+      return (t = this.onmessage) == null ? void 0 : t.call(this, e);
     }, this.ws.onerror = (e) => {
-      var n;
-      return (n = this.onerror) == null ? void 0 : n.call(this, e);
+      var t;
+      return (t = this.onerror) == null ? void 0 : t.call(this, e);
     }, this.ws.onclose = (e) => {
-      var n;
-      (n = this.onclose) == null || n.call(this, e), this._closed || this.scheduleReconnect();
+      var t;
+      (t = this.onclose) == null || t.call(this, e), this._closed || this.scheduleReconnect();
     });
   }
   scheduleReconnect() {
@@ -82,34 +82,34 @@ class I {
     return ((e = this.ws) == null ? void 0 : e.readyState) ?? WebSocket.CLOSED;
   }
   send(e) {
-    var n;
-    (n = this.ws) == null || n.send(e);
+    var t;
+    (t = this.ws) == null || t.send(e);
   }
-  close(e, n) {
+  close(e, t) {
     var a;
-    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, n);
+    this._closed = !0, this.reconnectTimer && (clearTimeout(this.reconnectTimer), this.reconnectTimer = null), (a = this.ws) == null || a.close(e, t);
   }
 }
-const W = /* @__PURE__ */ new Set();
-let U = null;
-function re() {
-  U || (U = new I(), U.onmessage = (t) => {
+const z = /* @__PURE__ */ new Set();
+let P = null;
+function he() {
+  P || (P = new U(), P.onmessage = (n) => {
     let e;
     try {
-      e = JSON.parse(t.data);
+      e = JSON.parse(n.data);
     } catch {
       return;
     }
-    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== u() || W.forEach((n) => n(e.data));
+    e.type !== "app_data_changed" || !e.data || e.data.appId && e.data.appId !== u() || z.forEach((t) => t(e.data));
   });
 }
-function oe(t) {
-  if (typeof t != "string") return t;
+function ue(n) {
+  if (typeof n != "string") return n;
   let e;
   try {
-    e = JSON.parse(t);
+    e = JSON.parse(n);
   } catch {
-    return t;
+    return n;
   }
   if (typeof e != "string") return e;
   try {
@@ -118,74 +118,74 @@ function oe(t) {
     return e;
   }
 }
-function O(t) {
-  const e = u(), n = m();
-  return t ? `${n}/api/v1/apps/${e}/storage/${encodeURIComponent(t)}` : `${n}/api/v1/apps/${e}/storage`;
+function J(n) {
+  const e = u(), t = p();
+  return n ? `${t}/api/v1/apps/${e}/storage/${encodeURIComponent(n)}` : `${t}/api/v1/apps/${e}/storage`;
 }
-const ce = {
-  async getItem(t) {
-    const e = await fetch(O(t));
+const fe = {
+  async getItem(n) {
+    const e = await fetch(J(n));
     if (e.status === 404) return null;
-    const n = await e.json();
-    return oe(n.value);
+    const t = await e.json();
+    return ue(t.value);
   },
-  async setItem(t, e) {
-    const n = typeof e == "string" ? e : JSON.stringify(e);
-    await fetch(O(t), {
+  async setItem(n, e) {
+    const t = typeof e == "string" ? e : JSON.stringify(e);
+    await fetch(J(n), {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: n })
+      body: JSON.stringify({ value: t })
     });
   },
-  async removeItem(t) {
-    await fetch(O(t), { method: "DELETE" });
+  async removeItem(n) {
+    await fetch(J(n), { method: "DELETE" });
   },
   async clear() {
-    const t = await this.keys();
-    await Promise.all(t.map((e) => this.removeItem(e)));
+    const n = await this.keys();
+    await Promise.all(n.map((e) => this.removeItem(e)));
   },
   async keys() {
-    return ((await (await fetch(O())).json()).items || []).map((n) => n[0]);
+    return ((await (await fetch(J())).json()).items || []).map((t) => t[0]);
   },
   /**
    * Call `handler` after every change to the store: the employee's writes
    * and other open views'. Returns a function that stops listening.
    */
-  onChange(t) {
-    return W.add(t), re(), () => {
-      W.delete(t);
+  onChange(n) {
+    return z.add(n), he(), () => {
+      z.delete(n);
     };
   }
 };
-function H(t) {
+function Y(n) {
   const e = u();
-  return `${m()}/api/v1/apps/${e}/agents/${t}`;
+  return `${p()}/api/v1/apps/${e}/agents/${n}`;
 }
-const ie = {
-  async invoke(t, e) {
-    return (await fetch(H("invoke"), {
+const pe = {
+  async invoke(n, e) {
+    return (await fetch(Y("invoke"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: t,
+        message: n,
         agent: e == null ? void 0 : e.agent,
         data: e == null ? void 0 : e.data
       })
     })).json();
   },
-  async *stream(t, e) {
-    const n = await fetch(H("stream"), {
+  async *stream(n, e) {
+    const t = await fetch(Y("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: t,
+        message: n,
         agent: e == null ? void 0 : e.agent,
         data: e == null ? void 0 : e.data
       })
     });
-    if (!n.body)
+    if (!t.body)
       throw new Error("No response body for streaming");
-    const a = n.body.getReader(), s = new TextDecoder();
+    const a = t.body.getReader(), s = new TextDecoder();
     let o = "";
     for (; ; ) {
       const { done: d, value: c } = await a.read();
@@ -207,31 +207,31 @@ const ie = {
     }
   }
 };
-function q(t) {
+function Q(n) {
   const e = u();
-  return `${m()}/api/v1/apps/${e}/janus/${t}`;
+  return `${p()}/api/v1/apps/${e}/janus/${n}`;
 }
-const de = {
-  async complete(t) {
-    const n = await (await fetch(q("complete"), {
+const me = {
+  async complete(n) {
+    const t = await (await fetch(Q("complete"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(t)
+      body: JSON.stringify(n)
     })).json();
-    return n.text || n.content || "";
+    return t.text || t.content || "";
   },
-  async *stream(t) {
-    const e = await fetch(q("stream"), {
+  async *stream(n) {
+    const e = await fetch(Q("stream"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(t)
+      body: JSON.stringify(n)
     });
     if (!e.body)
       throw new Error("No response body for streaming");
-    const n = e.body.getReader(), a = new TextDecoder();
+    const t = e.body.getReader(), a = new TextDecoder();
     let s = "";
     for (; ; ) {
-      const { done: o, value: d } = await n.read();
+      const { done: o, value: d } = await t.read();
       if (o) break;
       s += a.decode(d, { stream: !0 });
       const c = s.split(`
@@ -250,52 +250,108 @@ const de = {
     }
   }
 };
-async function le(t) {
-  const e = await fetch(`${m()}/api/v1/apps/${u()}/janus/decide`, {
+async function ge(n) {
+  const e = await fetch(`${p()}/api/v1/apps/${u()}/janus/decide`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(t)
-  }), n = await e.json().catch(() => ({}));
+    body: JSON.stringify(n)
+  }), t = await e.json().catch(() => ({}));
   if (!e.ok)
-    throw new Error(n.error || `decide failed (${e.status})`);
-  return n;
+    throw new Error(t.error || `decide failed (${e.status})`);
+  return t;
 }
-async function he(t) {
-  const e = new URLSearchParams(window.location.search), n = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${m()}/api/v1/apps/${u()}/share`, {
+async function be(n) {
+  const e = new URLSearchParams(window.location.search), t = e.get("thread") || "", a = e.get("client") || "", s = await fetch(`${p()}/api/v1/apps/${u()}/share`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: t.name, content: t.content, thread: n, client: a })
+    body: JSON.stringify({ name: n.name, content: n.content, thread: t, client: a })
   }), o = await s.json().catch(() => ({}));
   if (!s.ok)
     throw new Error(o.error || `share failed (${s.status})`);
   return o;
 }
-const ue = {
+const ye = 1e4;
+let $ = null, g = null, C = null;
+async function W(n) {
+  const e = new URLSearchParams(window.location.search).get("client") || "", t = await fetch(`${p()}/api/v1/apps/${u()}/listen`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ on: n, client: e })
+  });
+  if (!t.ok) {
+    const a = await t.text().catch(() => "");
+    throw new Error(a || `listen failed (${t.status})`);
+  }
+}
+function j(n) {
+  var t;
+  C && clearTimeout(C), C = null;
+  const e = g;
+  g = null, $ == null || $.close(), $ = null, (t = e == null ? void 0 : e.onState) == null || t.call(e, "stopped", n);
+}
+function we(n) {
+  var a;
+  let e;
+  try {
+    e = JSON.parse(n.data);
+  } catch {
+    return;
+  }
+  const t = e.data;
+  e.type !== "app_heard" || !t || !g || t.appId && t.appId !== u() || (t.type === "ready" ? (C && clearTimeout(C), C = null, (a = g.onState) == null || a.call(g, "listening")) : t.type === "text" ? g.onWords({ text: t.text ?? "", start: t.start ?? 0, end: t.end ?? 0, final: !!t.final }) : t.type === "error" ? j(t.message || "Nebo could not listen.") : t.type === "ended" && j());
+}
+const te = {
+  /**
+   * Ask Nebo to listen. Resolves once Nebo has the request; `onState` says
+   * when the microphone is open. Throws when the app may not listen.
+   */
+  async start(n) {
+    var t;
+    g && await te.stop(), g = n, (t = n.onState) == null || t.call(n, "starting");
+    const e = new Promise((a) => {
+      $ = new U(), $.onmessage = we, $.onopen = () => a();
+    });
+    try {
+      await e, await W(!0);
+    } catch (a) {
+      throw j(a instanceof Error ? a.message : String(a)), a;
+    }
+    C = setTimeout(() => {
+      W(!1).catch(() => {
+      }), j("Nebo is not open on this device to listen.");
+    }, ye);
+  },
+  /** Stop listening. */
+  async stop() {
+    g && (j(), await W(!1).catch(() => {
+    }));
+  }
+}, _e = {
   /**
    * `files.url('Media/Projects/reel/render.mp4')`. A path with a `.` or `..`
    * part names nothing inside a granted folder and is refused here.
    */
-  url(t) {
-    const e = t.split("/").filter((s) => s !== "");
+  url(n) {
+    const e = n.split("/").filter((s) => s !== "");
     if (e.some((s) => s === "." || s === ".."))
-      throw new Error(`[nebo-sdk] files.url: "${t}" climbs out of its folder; name the file inside the granted folder`);
-    const n = encodeURIComponent(u()), a = e.map(encodeURIComponent).join("/");
-    return `${m()}/api/v1/apps/${n}/files/${a}`;
+      throw new Error(`[nebo-sdk] files.url: "${n}" climbs out of its folder; name the file inside the granted folder`);
+    const t = encodeURIComponent(u()), a = e.map(encodeURIComponent).join("/");
+    return `${p()}/api/v1/apps/${t}/files/${a}`;
   }
 };
-function Q(t) {
-  return `${m()}/api/v1/apps/${encodeURIComponent(u())}/plugins/${t}`;
+function ne(n) {
+  return `${p()}/api/v1/apps/${encodeURIComponent(u())}/plugins/${n}`;
 }
-async function V(t) {
-  const e = await t.text().catch(() => "");
-  return new Error(e || `plugin call failed (${t.status})`);
+async function ae(n) {
+  const e = await n.text().catch(() => "");
+  return new Error(e || `plugin call failed (${n.status})`);
 }
-async function fe(t, e) {
-  const n = await fetch(Q(`jobs/${encodeURIComponent(t)}`), {
+async function xe(n, e) {
+  const t = await fetch(ne(`jobs/${encodeURIComponent(n)}`), {
     headers: { Accept: "text/event-stream" }
   });
-  if (!n.ok || !n.body) throw await V(n);
-  const a = n.body.getReader(), s = new TextDecoder();
+  if (!t.ok || !t.body) throw await ae(t);
+  const a = t.body.getReader(), s = new TextDecoder();
   let o = "", d = "", c = [];
   for (; ; ) {
     const { done: h, value: l } = await a.read();
@@ -304,35 +360,35 @@ async function fe(t, e) {
     const i = o.split(`
 `);
     o = i.pop() || "";
-    for (const x of i) {
-      const g = x.replace(/\r$/, "");
-      if (g === "") {
+    for (const v of i) {
+      const b = v.replace(/\r$/, "");
+      if (b === "") {
         if (d === "result") return JSON.parse(c.join(`
 `));
         d === "progress" && e(c.join(`
 `)), d = "", c = [];
-      } else g.startsWith("event:") ? d = g.slice(6).trim() : g.startsWith("data:") && c.push(g.slice(5).replace(/^ /, ""));
+      } else b.startsWith("event:") ? d = b.slice(6).trim() : b.startsWith("data:") && c.push(b.slice(5).replace(/^ /, ""));
     }
   }
   throw new Error("the plugin job ended without a result");
 }
-const pe = {
+const ve = {
   /**
    * Run `command` on the installed plugin `slug`, with `args` as its flags
    * (each key becomes `--key`; objects and lists go as JSON).
    */
-  async run(t, e, n = {}, a = {}) {
-    const s = typeof a.onProgress == "function", o = await fetch(Q(`${encodeURIComponent(t)}/run`), {
+  async run(n, e, t = {}, a = {}) {
+    const s = typeof a.onProgress == "function", o = await fetch(ne(`${encodeURIComponent(n)}/run`), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: e, args: n, timeout: a.timeout, background: s })
+      body: JSON.stringify({ command: e, args: t, timeout: a.timeout, background: s })
     });
-    if (!o.ok) throw await V(o);
+    if (!o.ok) throw await ae(o);
     const d = await o.json();
-    return s ? fe(d.job, a.onProgress) : d;
+    return s ? xe(d.job, a.onProgress) : d;
   }
 };
-class me {
+class Se {
   constructor() {
     this.ws = null, this.listeners = /* @__PURE__ */ new Map(), this._connected = !1, this._a2uiHandler = null, this.state = {};
   }
@@ -342,13 +398,13 @@ class me {
   }
   /** Connect to the app's surface WebSocket */
   connect() {
-    this.ws || (this.ws = new I(), this.ws.onopen = () => {
+    this.ws || (this.ws = new U(), this.ws.onopen = () => {
       this._connected = !0;
     }, this.ws.onmessage = (e) => {
-      var n, a;
+      var t, a;
       try {
         const s = JSON.parse(e.data);
-        if (s.type === "a2ui_message" && ((n = s.data) != null && n.message)) {
+        if (s.type === "a2ui_message" && ((t = s.data) != null && t.message)) {
           (a = this._a2uiHandler) == null || a.call(this, s.data.message);
           return;
         }
@@ -366,20 +422,20 @@ class me {
     this.ws && (this.ws.close(), this.ws = null), this._connected = !1;
   }
   /** Subscribe to a specific event type (or '*' for all) */
-  on(e, n) {
-    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(n), () => {
+  on(e, t) {
+    return this.listeners.has(e) || this.listeners.set(e, /* @__PURE__ */ new Set()), this.listeners.get(e).add(t), () => {
       var a;
-      (a = this.listeners.get(e)) == null || a.delete(n);
+      (a = this.listeners.get(e)) == null || a.delete(t);
     };
   }
   /** Remove a specific listener */
-  off(e, n) {
+  off(e, t) {
     var a;
-    (a = this.listeners.get(e)) == null || a.delete(n);
+    (a = this.listeners.get(e)) == null || a.delete(t);
   }
   /** Send an action/event to the agent */
-  send(e, n) {
-    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...n }));
+  send(e, t) {
+    !this.ws || this.ws.readyState !== WebSocket.OPEN || this.ws.send(JSON.stringify({ type: "action", name: e, ...t }));
   }
   /** Request a state snapshot from the agent */
   requestState() {
@@ -392,9 +448,9 @@ class me {
   // ─── Internal ────────────────────────────────────────────────────
   handleEvent(e) {
     e.type === "state_snapshot" ? this.state = { ...e.snapshot } : e.type === "state_delta" && this.applyDelta(e.delta);
-    const n = this.listeners.get(e.type);
-    if (n)
-      for (const s of n)
+    const t = this.listeners.get(e.type);
+    if (t)
+      for (const s of t)
         try {
           s(e);
         } catch {
@@ -408,16 +464,16 @@ class me {
         }
   }
   applyDelta(e) {
-    for (const n of e) {
-      const a = n.path.split("/").filter(Boolean);
+    for (const t of e) {
+      const a = t.path.split("/").filter(Boolean);
       if (a.length === 0) continue;
       const s = this.resolveParent(a);
       if (!s) continue;
       const o = a[a.length - 1];
-      switch (n.op) {
+      switch (t.op) {
         case "add":
         case "replace":
-          s[o] = n.value;
+          s[o] = t.value;
           break;
         case "remove":
           delete s[o];
@@ -426,16 +482,16 @@ class me {
     }
   }
   resolveParent(e) {
-    let n = this.state;
+    let t = this.state;
     for (let a = 0; a < e.length - 1; a++) {
-      if (n == null || typeof n != "object") return null;
-      n = n[e[a]];
+      if (t == null || typeof t != "object") return null;
+      t = t[e[a]];
     }
-    return n;
+    return t;
   }
 }
-const D = new me();
-class ge {
+const A = new Se();
+class ke {
   constructor() {
     this.processor = null, this.sendFn = null;
   }
@@ -457,8 +513,8 @@ class ge {
     if (this.processor)
       try {
         this.processor.processMessages([e]);
-      } catch (n) {
-        console.error("[nebo-sdk] A2UI processing error:", n);
+      } catch (t) {
+        console.error("[nebo-sdk] A2UI processing error:", t);
       }
   }
   /**
@@ -470,7 +526,7 @@ class ge {
   /**
    * Send a v0.9 client action back to the agent.
    */
-  sendAction(e, n) {
+  sendAction(e, t) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
@@ -480,7 +536,7 @@ class ge {
           action: {
             surfaceId: e,
             timestamp: (/* @__PURE__ */ new Date()).toISOString(),
-            ...n
+            ...t
           }
         }
       }
@@ -489,113 +545,113 @@ class ge {
   /**
    * Send a v0.9 client error report back to the agent.
    */
-  sendError(e, n, a, s) {
+  sendError(e, t, a, s) {
     this.sendFn && this.sendFn(JSON.stringify({
       type: "a2ui_action",
       data: {
         surface_id: e,
         message: {
           version: "v0.9",
-          error: { code: n, surfaceId: e, message: a, path: s }
+          error: { code: t, surfaceId: e, message: a, path: s }
         }
       }
     }));
   }
 }
-const J = new ge();
-let C = null;
-const be = {
+const M = new ke();
+let O = null;
+const $e = {
   async get() {
-    if (C) return C;
-    const t = u(), e = m(), n = await fetch(`${e}/api/v1/apps/${t}/identity`);
-    if (!n.ok)
-      throw new Error(`[nebo-sdk] identity fetch failed: ${n.status}`);
-    return C = await n.json(), C;
+    if (O) return O;
+    const n = u(), e = p(), t = await fetch(`${e}/api/v1/apps/${n}/identity`);
+    if (!t.ok)
+      throw new Error(`[nebo-sdk] identity fetch failed: ${t.status}`);
+    return O = await t.json(), O;
   },
   invalidate() {
-    C = null;
+    O = null;
   }
-}, N = /* @__PURE__ */ new Set();
-let k = null, B = null;
-function X(t = "") {
-  return `${m()}/api/v1/apps/${encodeURIComponent(u())}/chat${t}`;
+}, D = /* @__PURE__ */ new Set();
+let T = null, V = null;
+function se(n = "") {
+  return `${p()}/api/v1/apps/${encodeURIComponent(u())}/chat${n}`;
 }
-function ye(t) {
-  if (typeof t != "string") return null;
+function Te(n) {
+  if (typeof n != "string") return null;
   const e = `agent:${u()}:page`;
-  if (t !== e)
-    return t.startsWith(e + ":") ? t.slice(e.length + 1) : null;
+  if (n !== e)
+    return n.startsWith(e + ":") ? n.slice(e.length + 1) : null;
 }
-function S(t) {
-  N.forEach((e) => e(t));
+function k(n) {
+  D.forEach((e) => e(n));
 }
-let R = !1;
-function T() {
-  k || (R = !1, k = new I(), k.onopen = () => {
-    R && S({ type: "reconnected" }), R = !0;
-  }, k.onmessage = (t) => {
+let L = !1;
+function N() {
+  T || (L = !1, T = new U(), T.onopen = () => {
+    L && k({ type: "reconnected" }), L = !0;
+  }, T.onmessage = (n) => {
     let e;
     try {
-      e = JSON.parse(t.data);
+      e = JSON.parse(n.data);
     } catch {
       return;
     }
-    const n = e.data ?? {}, a = ye(n.session_id);
+    const t = e.data ?? {}, a = Te(t.session_id);
     if (a !== null)
       switch (e.type) {
         case "chat_user_message":
-          S({
+          k({
             type: "message",
             thread: a,
             message: {
-              id: String(n.id ?? ""),
+              id: String(t.id ?? ""),
               role: "user",
-              content: String(n.content ?? ""),
-              createdAt: Number(n.createdAt ?? Date.now())
+              content: String(t.content ?? ""),
+              createdAt: Number(t.createdAt ?? Date.now())
             }
           });
           break;
         case "chat_stream":
-          typeof n.content == "string" && n.content && S({ type: "stream", thread: a, text: n.content });
+          typeof t.content == "string" && t.content && k({ type: "stream", thread: a, text: t.content });
           break;
         case "chat_complete":
-          if (n.stop_reason === "queued_into_running_turn") break;
-          S({ type: "complete", thread: a, notice: typeof n.stop_notice == "string" ? n.stop_notice : void 0 });
+          if (t.stop_reason === "queued_into_running_turn") break;
+          k({ type: "complete", thread: a, notice: typeof t.stop_notice == "string" ? t.stop_notice : void 0 });
           break;
         case "chat_error":
-          S({ type: "error", thread: a, error: String(n.error ?? "Something went wrong. Try again.") });
+          k({ type: "error", thread: a, error: String(t.error ?? "Something went wrong. Try again.") });
           break;
         case "chat_cancelled":
-          S({ type: "stopped", thread: a });
+          k({ type: "stopped", thread: a });
           break;
         case "chat_waiting":
-          S({ type: "waiting", thread: a });
+          k({ type: "waiting", thread: a });
           break;
       }
   });
 }
-class Z extends Error {
-  constructor(e, n) {
-    super(n), this.status = e;
+class re extends Error {
+  constructor(e, t) {
+    super(t), this.status = e;
   }
 }
-async function P(t, e) {
-  const n = await fetch(X(t), {
+async function F(n, e) {
+  const t = await fetch(se(n), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(e)
   });
-  if (!n.ok) throw new Z(n.status, await n.text() || `chat: ${n.status}`);
-  return n;
+  if (!t.ok) throw new re(t.status, await t.text() || `chat: ${t.status}`);
+  return t;
 }
-const E = {
+const I = {
   /** The conversation so far, oldest first (the last 50, or `limit`). */
-  async history(t) {
+  async history(n) {
     const e = new URLSearchParams();
-    t != null && t.thread && e.set("thread", t.thread), t != null && t.before && e.set("before", t.before), t != null && t.limit && e.set("limit", String(t.limit));
-    const n = e.toString();
-    T();
-    const a = await fetch(X(n ? `?${n}` : ""));
+    n != null && n.thread && e.set("thread", n.thread), n != null && n.before && e.set("before", n.before), n != null && n.limit && e.set("limit", String(n.limit));
+    const t = e.toString();
+    N();
+    const a = await fetch(se(t ? `?${t}` : ""));
     if (!a.ok) throw new Error(await a.text() || `chat: ${a.status}`);
     const s = await a.json();
     return { messages: s.messages ?? [], running: !!s.running, waiting: !!s.waiting, hasMore: !!s.hasMore };
@@ -603,41 +659,41 @@ const E = {
   /** Say something to the employee. The reply arrives through `onMessage`.
    *  One message at a time: while a reply is on its way, a send is refused
    *  (stop it or wait). */
-  async send(t, e) {
-    T(), await P("", { message: t, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: B });
+  async send(n, e) {
+    N(), await F("", { message: n, thread: e == null ? void 0 : e.thread, scope: e == null ? void 0 : e.scope, context: V });
   },
   /** Stop the turn running in the conversation. */
-  async stop(t) {
-    T(), await P("/stop", { thread: t == null ? void 0 : t.thread });
+  async stop(n) {
+    N(), await F("/stop", { thread: n == null ? void 0 : n.thread });
   },
   /** Start the conversation over; the one before stays with the owner. */
-  async newThread(t) {
-    T(), await P("/new", { thread: t == null ? void 0 : t.thread }), f && f.thread === ((t == null ? void 0 : t.thread) || void 0) && f.reset();
+  async newThread(n) {
+    N(), await F("/new", { thread: n == null ? void 0 : n.thread }), f && f.thread === ((n == null ? void 0 : n.thread) || void 0) && f.reset();
   },
   /** Hear the conversation live: words sent (from any open view), the
    *  reply as it streams, and how each turn ends. Returns an unsubscribe. */
-  onMessage(t) {
-    return T(), N.add(t), () => {
-      N.delete(t), K();
+  onMessage(n) {
+    return N(), D.add(n), () => {
+      D.delete(n), X();
     };
   },
   /** What is on the page, sent beside every message. `null` clears it. */
-  setContext(t) {
-    B = t;
+  setContext(n) {
+    V = n;
   },
   /** A ready chat with the employee, drawn inside `element`. */
-  mount(t, e) {
-    f == null || f.destroy(), f = xe(t, e ?? {});
+  mount(n, e) {
+    f == null || f.destroy(), f = Oe(n, e ?? {});
   },
   unmount() {
-    f == null || f.destroy(), f = null, K();
+    f == null || f.destroy(), f = null, X();
   }
 };
-function K() {
-  N.size || f || !k || (k.close(), k = null);
+function X() {
+  D.size || f || !T || (T.close(), T = null);
 }
 let f = null;
-const G = "nebo-chat-style", we = `
+const Z = "nebo-chat-style", Ce = `
 .nebo-chat{--nc-bg:#fff;--nc-fg:#16181d;--nc-muted:#6b7280;--nc-line:#e5e7eb;--nc-me:#16181d;--nc-me-fg:#fff;--nc-them:#f3f4f6;--nc-accent:#4f46e5;
   display:flex;flex-direction:column;height:100%;min-height:0;background:var(--nc-bg);color:var(--nc-fg);
   font:16px/1.6 "Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;border:1px solid var(--nc-line);border-radius:12px;overflow:hidden;box-sizing:border-box}
@@ -668,145 +724,146 @@ const G = "nebo-chat-style", we = `
 .nebo-chat__button:disabled{opacity:.4;cursor:default}
 .nebo-chat__button--stop{background:var(--nc-fg);color:var(--nc-bg)}
 `;
-function _e() {
-  if (document.getElementById(G)) return;
-  const t = document.createElement("style");
-  t.id = G, t.textContent = we, document.head.appendChild(t);
+function Ee() {
+  if (document.getElementById(Z)) return;
+  const n = document.createElement("style");
+  n.id = Z, n.textContent = Ce, document.head.appendChild(n);
 }
-function y(t, e) {
-  const n = document.createElement(t);
-  return n.className = e, n;
+function w(n, e) {
+  const t = document.createElement(n);
+  return t.className = e, t;
 }
-function Y(t, e) {
-  t.textContent = "";
-  const n = /(`[^`\n]+`|\*\*[^*\n]+\*\*|https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/g;
+function ee(n, e) {
+  n.textContent = "";
+  const t = /(`[^`\n]+`|\*\*[^*\n]+\*\*|https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/g;
   let a = 0;
-  for (const s of e.matchAll(n)) {
+  for (const s of e.matchAll(t)) {
     const o = s.index ?? 0;
-    o > a && t.appendChild(document.createTextNode(e.slice(a, o)));
+    o > a && n.appendChild(document.createTextNode(e.slice(a, o)));
     const d = s[0];
     if (d.startsWith("`"))
-      t.appendChild(document.createElement("code")).textContent = d.slice(1, -1);
+      n.appendChild(document.createElement("code")).textContent = d.slice(1, -1);
     else if (d.startsWith("**"))
-      t.appendChild(document.createElement("strong")).textContent = d.slice(2, -2);
+      n.appendChild(document.createElement("strong")).textContent = d.slice(2, -2);
     else {
-      const c = t.appendChild(document.createElement("a"));
+      const c = n.appendChild(document.createElement("a"));
       c.href = d, c.target = "_blank", c.rel = "noopener noreferrer", c.textContent = d;
     }
     a = o + d.length;
   }
-  a < e.length && t.appendChild(document.createTextNode(e.slice(a)));
+  a < e.length && n.appendChild(document.createTextNode(e.slice(a)));
 }
-function xe(t, e) {
-  _e();
-  const n = e.contextId || void 0, a = e.theme ?? "auto", s = y("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
+function Oe(n, e) {
+  Ee();
+  const t = e.contextId || void 0, a = e.theme ?? "auto", s = w("div", `nebo-chat nebo-chat--${a}${e.borderless ? " nebo-chat--borderless" : ""}`);
   e.height && (s.style.height = e.height);
-  const o = y("div", "nebo-chat__log");
+  const o = w("div", "nebo-chat__log");
   o.setAttribute("role", "log"), o.setAttribute("aria-live", "polite");
-  const d = y("form", "nebo-chat__composer"), c = y("textarea", "nebo-chat__input");
+  const d = w("form", "nebo-chat__composer"), c = w("textarea", "nebo-chat__input");
   c.rows = 1, c.setAttribute("aria-label", "Message"), c.placeholder = e.placeholder || (e.name ? `Message ${e.name}` : "Message");
-  const h = y("button", "nebo-chat__button");
-  h.type = "submit", d.append(c, h), s.append(o, d), t.appendChild(s);
+  const h = w("button", "nebo-chat__button");
+  h.type = "submit", d.append(c, h), s.append(o, d), n.appendChild(s);
   let l = !1, i = null;
-  const x = y("div", "nebo-chat__empty");
-  x.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
-  const g = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, $ = (r = !1) => {
-    (r || g()) && (o.scrollTop = o.scrollHeight);
-  }, A = () => {
-    o.querySelector(".nebo-chat__msg") ? x.remove() : o.appendChild(x);
-  }, v = (r, b) => {
-    x.remove();
-    const j = y("div", `nebo-chat__msg nebo-chat__msg--${r}`);
-    return Y(j, b), o.appendChild(j), j;
-  }, ee = () => {
-    const r = y("div", "nebo-chat__msg nebo-chat__msg--assistant");
-    return r.appendChild(y("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), x.remove(), o.appendChild(r), r;
-  }, M = () => {
+  const v = w("div", "nebo-chat__empty");
+  v.textContent = e.name ? `Ask ${e.name} anything.` : "Ask anything.";
+  const b = () => o.scrollHeight - o.scrollTop - o.clientHeight < 48, E = (r = !1) => {
+    (r || b()) && (o.scrollTop = o.scrollHeight);
+  }, H = () => {
+    o.querySelector(".nebo-chat__msg") ? v.remove() : o.appendChild(v);
+  }, S = (r, y) => {
+    v.remove();
+    const R = w("div", `nebo-chat__msg nebo-chat__msg--${r}`);
+    return ee(R, y), o.appendChild(R), R;
+  }, oe = () => {
+    const r = w("div", "nebo-chat__msg nebo-chat__msg--assistant");
+    return r.appendChild(w("span", "nebo-chat__dots")).append(document.createElement("i"), document.createElement("i"), document.createElement("i")), v.remove(), o.appendChild(r), r;
+  }, q = () => {
     !i || i.text || (i.node.classList.add("nebo-chat__msg--waiting"), i.node.textContent = e.name ? `${e.name} is waiting for your OK in Nebo.` : "Waiting for your OK in Nebo.");
-  }, p = (r) => {
-    l = r, h.textContent = r ? "Stop" : "Send", h.classList.toggle("nebo-chat__button--stop", r), h.disabled = !r && !c.value.trim(), r && !i && (i = { node: ee(), text: "" }, $(!0)), r || (i && !i.text && i.node.remove(), i = null, A());
-  }, L = () => {
+  }, m = (r) => {
+    l = r, h.textContent = r ? "Stop" : "Send", h.classList.toggle("nebo-chat__button--stop", r), h.disabled = !r && !c.value.trim(), r && !i && (i = { node: oe(), text: "" }, E(!0)), r || (i && !i.text && i.node.remove(), i = null, H());
+  }, B = () => {
     c.style.height = "auto", c.style.height = `${Math.min(c.scrollHeight, 160)}px`, l || (h.disabled = !c.value.trim());
-  }, F = async () => {
-    p(!1), o.textContent = "";
+  }, K = async () => {
+    m(!1), o.textContent = "";
     try {
-      const r = await E.history({ thread: n });
-      for (const b of r.messages) v(b.role, b.content);
-      A(), p(r.running), r.running && r.waiting && M(), $(!0);
+      const r = await I.history({ thread: t });
+      for (const y of r.messages) S(y.role, y.content);
+      H(), m(r.running), r.running && r.waiting && q(), E(!0);
     } catch {
-      v("error", "Could not load the conversation. Try again.");
+      S("error", "Could not load the conversation. Try again.");
     }
-  }, te = E.onMessage((r) => {
+  }, ce = I.onMessage((r) => {
     if (r.type === "reconnected") {
-      F();
+      K();
       return;
     }
-    r.thread === n && (r.type === "waiting" ? (i || p(!0), M()) : r.type === "message" ? l || (v("user", r.message.content), p(!0)) : r.type === "stream" ? (i || p(!0), i && (i.text += r.text, i.node.classList.remove("nebo-chat__msg--waiting"), i.node.textContent = "", Y(i.node, i.text), $())) : r.type === "error" ? (p(!1), v("error", r.error), $()) : (p(!1), r.type === "complete" && r.notice && v("note", r.notice)));
-  }), z = async () => {
+    r.thread === t && (r.type === "waiting" ? (i || m(!0), q()) : r.type === "message" ? l || (S("user", r.message.content), m(!0)) : r.type === "stream" ? (i || m(!0), i && (i.text += r.text, i.node.classList.remove("nebo-chat__msg--waiting"), i.node.textContent = "", ee(i.node, i.text), E())) : r.type === "error" ? (m(!1), S("error", r.error), E()) : (m(!1), r.type === "complete" && r.notice && S("note", r.notice)));
+  }), G = async () => {
     if (l) {
       try {
-        await E.stop({ thread: n });
+        await I.stop({ thread: t });
       } catch {
       }
       return;
     }
     const r = c.value.trim();
     if (r) {
-      c.value = "", L(), v("user", r), p(!0);
+      c.value = "", B(), S("user", r), m(!0);
       try {
-        await E.send(r, { thread: n, scope: e.scope });
-      } catch (b) {
-        p(!1), v("error", b instanceof Z && b.status === 409 ? b.message : "Could not send. Try again.");
+        await I.send(r, { thread: t, scope: e.scope });
+      } catch (y) {
+        m(!1), S("error", y instanceof re && y.status === 409 ? y.message : "Could not send. Try again.");
       }
     }
   };
   return d.addEventListener("submit", (r) => {
-    r.preventDefault(), z();
-  }), c.addEventListener("input", L), c.addEventListener("keydown", (r) => {
-    r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), z());
-  }), p(!1), F(), {
-    thread: n,
+    r.preventDefault(), G();
+  }), c.addEventListener("input", B), c.addEventListener("keydown", (r) => {
+    r.key === "Enter" && !r.shiftKey && !r.isComposing && (r.preventDefault(), G());
+  }), m(!1), K(), {
+    thread: t,
     reset() {
-      o.textContent = "", p(!1);
+      o.textContent = "", m(!1);
     },
     destroy() {
-      te(), s.remove();
+      ce(), s.remove();
     }
   };
 }
-class ve {
+class Ne {
   constructor() {
-    this.fetch = se, this.WebSocket = I, this.storage = ce, this.agents = ie, this.janus = de, this.decide = le, this.share = he, this.files = ue, this.plugins = pe, this.surfaces = D, this.a2ui = J, this.identity = be, this.chat = E, D._a2uiHandler = (e) => J._handleMessage(e), J._setSendFn((e) => D._rawSend(e));
+    this.fetch = le, this.WebSocket = U, this.storage = fe, this.agents = pe, this.janus = me, this.decide = ge, this.share = be, this.listen = te, this.files = _e, this.plugins = ve, this.surfaces = A, this.a2ui = M, this.identity = $e, this.chat = I, A._a2uiHandler = (e) => M._handleMessage(e), M._setSendFn((e) => A._rawSend(e));
   }
   /**
    * Manually configure the SDK (optional — auto-detection works in most cases).
    */
   configure(e) {
-    e.appId && ne(e.appId), e.baseUrl && ae(e.baseUrl);
+    e.appId && ie(e.appId), e.baseUrl && de(e.baseUrl);
   }
 }
-const Se = new ve();
+const Ie = new Ne();
 export {
-  Z as ChatError,
-  ge as NeboA2UI,
-  ve as NeboSDK,
-  me as NeboSurfaces,
-  I as NeboWebSocket,
-  J as a2ui,
-  ie as agents,
-  E as chat,
-  le as decide,
-  ue as files,
+  re as ChatError,
+  ke as NeboA2UI,
+  Ne as NeboSDK,
+  Se as NeboSurfaces,
+  U as NeboWebSocket,
+  M as a2ui,
+  pe as agents,
+  I as chat,
+  ge as decide,
+  _e as files,
   u as getAppId,
-  m as getBaseUrl,
-  be as identity,
-  de as janus,
-  Se as nebo,
-  se as neboFetch,
-  pe as plugins,
-  ne as setAppId,
-  ae as setBaseUrl,
-  he as share,
-  ce as storage,
-  D as surfaces
+  p as getBaseUrl,
+  $e as identity,
+  me as janus,
+  te as listen,
+  Ie as nebo,
+  le as neboFetch,
+  ve as plugins,
+  ie as setAppId,
+  de as setBaseUrl,
+  be as share,
+  fe as storage,
+  A as surfaces
 };
